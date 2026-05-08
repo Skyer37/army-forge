@@ -292,6 +292,24 @@ const FACTIONS = {
           { name: "Watchman's Vow", points: 15, type: "Command" },
         ],
       },
+      "Headhunter Task Force": {
+        rule: "Tank Aces — up to three vehicles become Characters with Enhancements; Tank Aces gain bonus Advance and re-rolls",
+        enhancements: [
+          { name: "Tank Ace", points: 15, type: "Command" },
+          { name: "Hunter Killer", points: 20, type: "Offensive" },
+          { name: "Veteran Crew", points: 25, type: "Defensive" },
+          { name: "Master Gunner", points: 30, type: "Offensive" },
+        ],
+      },
+      "Armoured Speartip": {
+        rule: "Heavy Transports — 14+ wound transports gain Heavy Transport keyword; disembarking units get a free move and bonus to hit",
+        enhancements: [
+          { name: "Reinforced Plate", points: 25, type: "Defensive" },
+          { name: "Iron Resolve", points: 20, type: "Defensive" },
+          { name: "Convoy Commander", points: 30, type: "Command" },
+          { name: "Disembark Drill", points: 15, type: "Mobility" },
+        ],
+      },
     },
   },
 
@@ -662,13 +680,55 @@ const FACTIONS = {
       },
     },
     detachments: {
-      "Teleport Strike Force": {
-        rule: "Teleport Assault — drop in close, redeploy via the warp",
+      "Brotherhood Strike": {
+        rule: "Fury of Titan — Deep Striking units re-roll Hit and Wound rolls of 1; flexible Teleport Assault redeployment",
         enhancements: [
           { name: "Augurium Scrolls", points: 15, type: "Utility" },
           { name: "Sigil of Exigence", points: 25, type: "Defensive" },
           { name: "Liber Daemonica", points: 20, type: "Offensive" },
           { name: "First to the Fray", points: 30, type: "Mobility" },
+        ],
+      },
+      "Hallowed Conclave": {
+        rule: "Knights of Titan — Terminator-focused detachment with bonuses to elite armored saves and re-rolls",
+        enhancements: [
+          { name: "Hammer of Right", points: 25, type: "Offensive" },
+          { name: "Mantle of Castigation", points: 30, type: "Defensive" },
+          { name: "Voice of Terra", points: 20, type: "Command" },
+          { name: "Crucible of Malediction", points: 15, type: "Offensive" },
+        ],
+      },
+      Banishers: {
+        rule: "Daemon Hunters — high-pressure melee detachment; bonuses against Daemons and on the charge",
+        enhancements: [
+          { name: "Bringer of Doom", points: 25, type: "Offensive" },
+          { name: "Sword of Sigismund's Foes", points: 30, type: "Offensive" },
+          { name: "Sigil of the Inquisition", points: 20, type: "Utility" },
+          { name: "Wrath of the Innocent", points: 15, type: "Offensive" },
+        ],
+      },
+      "Sanctic Spearhead": {
+        rule: "Dread Adversary — Dreadknight and vehicle focus; re-rolls and damage bonuses for big targets",
+        enhancements: [
+          { name: "Master of Battles", points: 25, type: "Command" },
+          { name: "Tempering of the Anvil", points: 30, type: "Defensive" },
+          { name: "Hidden Stalker", points: 20, type: "Stealth" },
+        ],
+      },
+      "Augurium Task Force": {
+        rule: "Premonition — finesse tools that thwart opponent plans; bonus to reactive movement and counter-strikes",
+        enhancements: [
+          { name: "Strands of Truth", points: 25, type: "Utility" },
+          { name: "Foresight", points: 20, type: "Mobility" },
+          { name: "Augurium Mantle", points: 30, type: "Defensive" },
+        ],
+      },
+      "Warpbane Task Force": {
+        rule: "Pure Souls — Purifiers and surrounding units empowered; anti-psyker bonuses (Grotmas)",
+        enhancements: [
+          { name: "Pyre of Faith", points: 25, type: "Offensive" },
+          { name: "Bound by Oath", points: 20, type: "Command" },
+          { name: "Soulbinder", points: 30, type: "Offensive" },
         ],
       },
     },
@@ -1009,6 +1069,24 @@ const FACTIONS = {
           { name: "Trench Warrior", points: 25, type: "Offensive" },
         ],
       },
+      "Armoured Infantry": {
+        rule: "Mechanised Push — Infantry inside transports gain Lethal Hits on first turn after disembarking; transports gain extra movement",
+        enhancements: [
+          { name: "Hippogriff Pilot", points: 20, type: "Mobility" },
+          { name: "Master of Logistics", points: 25, type: "Command" },
+          { name: "Reinforced Hull", points: 30, type: "Defensive" },
+          { name: "Embark Discipline", points: 15, type: "Mobility" },
+        ],
+      },
+      "Steel Hammer": {
+        rule: "Squadron Command — Command Squads issue Orders to vehicle Squadrons; Leman Russ and lighter tanks get the new On My Signal Order",
+        enhancements: [
+          { name: "Squadron Marshal", points: 25, type: "Command" },
+          { name: "Targeting Augur", points: 20, type: "Offensive" },
+          { name: "Hammer Strike", points: 30, type: "Offensive" },
+          { name: "Field Repair", points: 15, type: "Defensive" },
+        ],
+      },
     },
   },
 
@@ -1180,6 +1258,15 @@ const FACTIONS = {
           { name: "Paragon of the Omnissiah", points: 15, type: "Defensive" },
         ],
       },
+      "Cogbound Alliance": {
+        rule: "Mechanicus Allies — Knights and Armigers heal each turn near Tech-Priests; allied Mechanicus units re-roll 1s (Grotmas 2024)",
+        enhancements: [
+          { name: "Magos Questoris", points: 30, type: "Defensive" },
+          { name: "Omnissian Champion", points: 25, type: "Defensive" },
+          { name: "Vocifer Magnificat", points: 20, type: "Command" },
+          { name: "Sacristan Pledge", points: 15, type: "Defensive" },
+        ],
+      },
     },
   },
 
@@ -1233,13 +1320,45 @@ const FACTIONS = {
       },
     },
     detachments: {
-      "Ordos Detachment": {
-        rule: "Inquisitorial Authority — Inquisitor commands special operatives",
+      "Imperialis Fleet": {
+        rule: "Priority Target — pick a target each Command phase for the army to gain re-rolls or extra hits against",
         enhancements: [
           { name: "Auspex of Vex", points: 20, type: "Utility" },
           { name: "Spy Network", points: 25, type: "Stealth" },
           { name: "Psyk-out Grenades", points: 15, type: "Offensive" },
           { name: "Power Mace of the Ordos", points: 20, type: "Offensive" },
+        ],
+      },
+      "Ordo Xenos": {
+        rule: "Xeno-Hunter — pick a hostile keyword each turn; gain Lethal Hits and bonus to wound against units with that keyword",
+        enhancements: [
+          { name: "Xenos Specialist", points: 25, type: "Offensive" },
+          { name: "Stalking Predator", points: 20, type: "Mobility" },
+          { name: "Watchful Eye", points: 15, type: "Utility" },
+        ],
+      },
+      "Ordo Hereticus": {
+        rule: "Hunter of Witches — bonus damage and Devastating Wounds against Psykers and Battle-shocked units",
+        enhancements: [
+          { name: "Witchhunter's Mark", points: 25, type: "Offensive" },
+          { name: "Sanctified Reliquary", points: 20, type: "Defensive" },
+          { name: "Pyre Sigil", points: 30, type: "Offensive" },
+        ],
+      },
+      "Ordo Malleus": {
+        rule: "Daemon-Slayer — anti-Daemon bonuses; Inquisitor and units gain Devastating Wounds vs Daemon units",
+        enhancements: [
+          { name: "Daemonbane Sword", points: 30, type: "Offensive" },
+          { name: "Soul Sight", points: 20, type: "Utility" },
+          { name: "Warding Talisman", points: 25, type: "Defensive" },
+        ],
+      },
+      "Officio Assassinorum Strike Force": {
+        rule: "Assassin Cabal — all four Assassins coordinate; Stratagems improve their Stealth and Lethality (Grotmas)",
+        enhancements: [
+          { name: "Master Assassin", points: 30, type: "Offensive" },
+          { name: "Polymorphine Mastery", points: 25, type: "Stealth" },
+          { name: "Lightning Reflexes", points: 20, type: "Mobility" },
         ],
       },
     },
@@ -1962,7 +2081,7 @@ const FACTIONS = {
     },
     detachments: {
       "Traitoris Lance": {
-        rule: "Code Chivalric — pick a code each round, gain bonuses",
+        rule: "Harbingers of Dread — pick a Dread ability each round; force Battle-shock on damaged enemy units",
         enhancements: [
           { name: "The Helm Diabolus", points: 30, type: "Defensive" },
           { name: "Diabolic Bulwark", points: 20, type: "Defensive" },
@@ -1970,20 +2089,37 @@ const FACTIONS = {
           { name: "Aetheric Conduit", points: 30, type: "Offensive" },
         ],
       },
-      "Iconoclast Lance": {
-        rule: "Wreaking Havoc — bonuses for destroying enemy units",
+      "Iconoclast Fiefdom": {
+        rule: "Cult of the Despot — combine Knights with Cultists/Accursed Cultists; sacrifice them for dark blessings (Grotmas 2024)",
         enhancements: [
           { name: "Mark of the Despot", points: 25, type: "Offensive" },
           { name: "Iron Fist", points: 30, type: "Offensive" },
           { name: "Tyrant's Claim", points: 20, type: "Command" },
         ],
       },
-      "War Dog Pack": {
-        rule: "Pack Tactics — War Dog focused with mobility bonuses",
+      "Houndpack Lance": {
+        rule: "Pack Hunters — War Dog units gain Battleline; mobility bonuses and pack synergy",
         enhancements: [
           { name: "Pack Alpha", points: 25, type: "Command" },
           { name: "Hunter's Mark", points: 20, type: "Offensive" },
           { name: "Bestial Ferocity", points: 30, type: "Offensive" },
+        ],
+      },
+      "Infernal Lance": {
+        rule: "Pact with Damnation — pass Leadership tests for damage/speed/durability bonuses; failure causes mortal wounds",
+        enhancements: [
+          { name: "Diabolic Strength", points: 30, type: "Offensive" },
+          { name: "Infernal Pact", points: 25, type: "Defensive" },
+          { name: "Soulburn Engine", points: 20, type: "Offensive" },
+        ],
+      },
+      "Lords of Dread": {
+        rule: "Towering Tyrants — Titanic Knight focus; extra Enhancement slots; units gain OC 5 on objectives",
+        enhancements: [
+          { name: "Helm of Dominion", points: 30, type: "Command" },
+          { name: "Crown of the Tyrant", points: 25, type: "Defensive" },
+          { name: "Aetheric Lord", points: 30, type: "Offensive" },
+          { name: "Eternal Standard", points: 20, type: "Defensive" },
         ],
       },
     },
@@ -2467,6 +2603,7 @@ const FACTIONS = {
             { name: "Wurrboy", points: 55, max: 1 },
             { name: "Zodgrod Wortsnagga", points: 70, max: 1 },
             { name: "Deffkilla Wartrike", points: 130, max: 1 },
+            { name: "Wazdakka Gutsmek", points: 175, max: 1 },
           ],
           troops: [
             { name: "Boyz (10)", points: 85, max: 6 },
@@ -2613,11 +2750,20 @@ const FACTIONS = {
         ],
       },
       "Blitz Brigade": {
-        rule: "Eager for the Fight — units disembarking transports get re-rolls",
+        rule: "Eager for the Fight — Orks disembarking from transports re-roll Advance and Charge; Battlewagons and bus units gain durability",
         enhancements: [
           { name: "Ferocious Show Off", points: 10, type: "Offensive" },
           { name: "Raucous Warcaller", points: 15, type: "Command" },
           { name: "Iron Gob Driver", points: 20, type: "Mobility" },
+        ],
+      },
+      "Speedwaaagh!": {
+        rule: "Turbo Boostas — Speed Freeks and Trukks Advance 24 inches in a straight line; Wazdakka makes Warbikers Battleline",
+        enhancements: [
+          { name: "Kustom Shokk Box", points: 25, type: "Mobility" },
+          { name: "Master Meknologist", points: 20, type: "Defensive" },
+          { name: "Supa-Burny Fuel", points: 15, type: "Offensive" },
+          { name: "Da Bikeboss", points: 30, type: "Command" },
         ],
       },
     },
@@ -3001,8 +3147,8 @@ const FACTIONS = {
       },
     },
     detachments: {
-      Oathband: {
-        rule: "Judgement Tokens — mark enemy units for army-wide bonuses",
+      "Needgaârd Oathband": {
+        rule: "Judgement Tokens — mark enemy units for army-wide hit/wound bonuses; the all-rounder Votann detachment",
         enhancements: [
           { name: "A Long List", points: 15, type: "Offensive" },
           { name: "Wayfarer's Grace", points: 20, type: "Mobility" },
@@ -3010,20 +3156,44 @@ const FACTIONS = {
           { name: "Grim Demeanour", points: 20, type: "Defensive" },
         ],
       },
-      "Hearthkyn Yeomanry": {
-        rule: "Hearth-Sworn — Hearthkyn and Pioneer units gain durability and re-rolls",
+      "Persecution Prospect": {
+        rule: "Relentless Pursuit — gain Yield Points by sticking to marked targets; harder-hitting Judgement effects",
         enhancements: [
-          { name: "Master of the Forge", points: 25, type: "Offensive" },
-          { name: "Hearth-Bound", points: 20, type: "Defensive" },
-          { name: "Voidsmen's Edge", points: 30, type: "Offensive" },
+          { name: "Master of Grudges", points: 25, type: "Offensive" },
+          { name: "Hunter's Sigil", points: 20, type: "Utility" },
+          { name: "Eternal Pursuit", points: 30, type: "Mobility" },
         ],
       },
-      "Ymyr Conglomerate": {
-        rule: "Mining Conglomerate — heavy industrial vehicles and Iron-Kin focus",
+      "Dêlve Assault Shift": {
+        rule: "Berserk Cohort — Cthonian Berserks gain Battleline; bonus damage when paired with Earthshakers and demolition support",
+        enhancements: [
+          { name: "Brutal Foreman", points: 25, type: "Offensive" },
+          { name: "Pickaxe Specialist", points: 20, type: "Offensive" },
+          { name: "Mining Charge", points: 30, type: "Offensive" },
+        ],
+      },
+      "Brandfast Oathband": {
+        rule: "Mechanised Push — Infantry within 6 inches of a Transport gain Sustained Hits 1; vehicle-focused Stratagems and Overwatch tools",
         enhancements: [
           { name: "Master of the Hekaton", points: 25, type: "Defensive" },
           { name: "Mining Voider", points: 20, type: "Offensive" },
           { name: "Iron-Kin Conduit", points: 30, type: "Command" },
+        ],
+      },
+      "Hearthfyre Arsenal": {
+        rule: "Memnyr Cohort — Iron-Masters and Memnyr units generate extra Yield Points on objectives; Steeljacks and big guns shine",
+        enhancements: [
+          { name: "Master Iron-Master", points: 25, type: "Command" },
+          { name: "Memnyr Strategist", points: 30, type: "Defensive" },
+          { name: "Forge-Gift", points: 20, type: "Offensive" },
+        ],
+      },
+      Hearthband: {
+        rule: "Wall of Hearthguard — Einhyr Hearthguard and Champion focus; replace Judgement Tokens with elite armor support (Grotmas '25)",
+        enhancements: [
+          { name: "Champion's Resolve", points: 25, type: "Defensive" },
+          { name: "Hearth Sentinel", points: 30, type: "Defensive" },
+          { name: "Oathwarder", points: 20, type: "Command" },
         ],
       },
     },
@@ -3296,6 +3466,7 @@ const SYNERGIES = {
   "Wurrboy": ["Beast Snagga Boyz (10)"],
   "Zodgrod Wortsnagga": ["Gretchin (10)"],
   "Deffkilla Wartrike": ["Warbikers (3)"],
+  "Wazdakka Gutsmek": ["Warbikers (3)", "Megatrakk Scrapjet", "Boomdakka Snazzwagon"],
 
   // Tyranids
   "Hive Tyrant": ["Tyrant Guard (3)", "Termagants (10)"],
@@ -3408,6 +3579,16 @@ const COMBOS = {
       name: "Vanguard Recon",
       description: "Phobos infiltrators, sniper support",
       units: ["Lieutenant in Phobos Armour" /* may not exist */, "Infiltrator Squad (5)", "Eliminator Squad (3)", "Incursor Squad (5)", "Suppressor Squad (3)"],
+    },
+    {
+      name: "Tank Ace Headhunters",
+      description: "Three Tank Aces ride out as Characters with their own Enhancements",
+      units: ["Predator Annihilator", "Predator Annihilator", "Repulsor Executioner", "Hellblaster Squad (5)", "Eradicator Squad (3)"],
+    },
+    {
+      name: "Land Raider Speartip",
+      description: "Heavy Transport delivers Terminators into the heart of the foe",
+      units: ["Captain in Terminator Armour", "Terminator Squad (5)", "Assault Terminator Squad (5)", "Land Raider", "Repulsor"],
     },
   ],
   "Black Templars": [
@@ -3531,6 +3712,16 @@ const COMBOS = {
       name: "Armoured Fist",
       description: "Tank-heavy column with Lord Solar leading",
       units: ["Lord Solar Leontus", "Leman Russ Battle Tank", "Leman Russ Demolisher", "Rogal Dorn Battle Tank", "Hellhound"],
+    },
+    {
+      name: "Mechanised Infantry",
+      description: "Cadians ride to the front in transports for the Armageddon style of warfare",
+      units: ["Cadian Castellan", "Cadian Shock Troops (10)", "Cadian Shock Troops (10)", "Chimera", "Chimera"],
+    },
+    {
+      name: "Tank Squadron",
+      description: "Tank Commander coordinates a squadron of Leman Russes via the new Squadron Command",
+      units: ["Tank Commander", "Leman Russ Battle Tank", "Leman Russ Battle Tank", "Leman Russ Demolisher", "Cadian Command Squad"],
     },
   ],
   "Adeptus Mechanicus": [
@@ -3658,7 +3849,7 @@ const COMBOS = {
   ],
   "Chaos Knights": [
     {
-      name: "Iconoclast Lance",
+      name: "Iconoclast Fiefdom",
       description: "Despoiler and Rampager with War Dog pack",
       units: ["Knight Despoiler", "Knight Rampager", "War Dog Karnivore", "War Dog Karnivore", "War Dog Brigand"],
     },
@@ -3749,6 +3940,11 @@ const COMBOS = {
       name: "Beast Hunt",
       description: "Beastboss with Squighog cavalry",
       units: ["Beastboss on Squigosaur", "Squighog Boyz (3)", "Beast Snagga Boyz (10)", "Wurrboy"],
+    },
+    {
+      name: "Wazdakka's Speedwaaagh!",
+      description: "Wazdakka leads bikes, buggies, and trikes in a roaring straight-line charge",
+      units: ["Wazdakka Gutsmek", "Warbikers (3)", "Warbikers (3)", "Megatrakk Scrapjet", "Boomdakka Snazzwagon"],
     },
   ],
   "Tyranids": [
@@ -3909,17 +4105,17 @@ function pickUnit(units, maxPoints) {
 }
 
 function generateArmy({
-  faction,
-  subFaction,
-  points,
-  armyType,
-  requiredRoles,
-  detachment,
-  selectedEnhancements,
-  enhancementsEnabled,
-  pinnedUnits,
-  comboName,
-}) {
+                        faction,
+                        subFaction,
+                        points,
+                        armyType,
+                        requiredRoles,
+                        detachment,
+                        selectedEnhancements,
+                        enhancementsEnabled,
+                        pinnedUnits,
+                        comboName,
+                      }) {
   const factionData = FACTIONS[faction];
   const subData = factionData.subFactions[subFaction];
   const unitPool = mergeUnitPools(subData.units, subData.extra);
@@ -4007,7 +4203,7 @@ function generateArmy({
     attempts++;
     const remaining = unitBudget - spent;
     const affordableRoles = allRoles.filter((role) =>
-      unitPool[role].some((u) => u.points <= remaining)
+        unitPool[role].some((u) => u.points <= remaining)
     );
     if (affordableRoles.length === 0) break;
 
@@ -4190,27 +4386,27 @@ export default function App() {
       setArmy(result);
       setGenerating(false);
       setTimeout(
-        () => document.getElementById("results")?.scrollIntoView({ behavior: "smooth" }),
-        100
+          () => document.getElementById("results")?.scrollIntoView({ behavior: "smooth" }),
+          100
       );
     }, 500);
   };
 
   const toggleRole = (role) => {
     setRequiredRoles((prev) =>
-      prev.includes(role) ? prev.filter((r) => r !== role) : [...prev, role]
+        prev.includes(role) ? prev.filter((r) => r !== role) : [...prev, role]
     );
   };
 
   const toggleEnhancement = (name) => {
     setSelectedEnhancements((prev) =>
-      prev.includes(name) ? prev.filter((n) => n !== name) : [...prev, name]
+        prev.includes(name) ? prev.filter((n) => n !== name) : [...prev, name]
     );
   };
 
   const togglePinnedUnit = (name) => {
     setPinnedUnits((prev) =>
-      prev.includes(name) ? prev.filter((n) => n !== name) : [...prev, name]
+        prev.includes(name) ? prev.filter((n) => n !== name) : [...prev, name]
     );
   };
 
@@ -4240,7 +4436,7 @@ export default function App() {
   // ARMY EDITOR FUNCTIONS
   // ==========================================
   const recalcSpent = (units) =>
-    units.reduce((s, u) => s + (u.points * (u.qty || 1)), 0);
+      units.reduce((s, u) => s + (u.points * (u.qty || 1)), 0);
 
   const editorRemoveUnit = (unitId) => {
     if (!army) return;
@@ -4398,8 +4594,8 @@ export default function App() {
       setSavedStatus(`Loaded "${entry.name}"`);
       setSavedPanelOpen(false);
       setTimeout(
-        () => document.getElementById("results")?.scrollIntoView({ behavior: "smooth" }),
-        150
+          () => document.getElementById("results")?.scrollIntoView({ behavior: "smooth" }),
+          150
       );
     }, 50);
   };
@@ -4428,7 +4624,7 @@ export default function App() {
         await window.storage.set(entry.key, JSON.stringify(stored));
       }
       setSavedArmies((prev) =>
-        prev.map((e) => (e.key === entry.key ? updated : e))
+          prev.map((e) => (e.key === entry.key ? updated : e))
       );
       setRenamingKey(null);
       setRenameDraft("");
@@ -4539,15 +4735,15 @@ export default function App() {
   };
 
   return (
-    <div
-      className="min-h-screen w-full"
-      style={{
-        background:
-          "radial-gradient(ellipse at top, #1a0f08 0%, #0a0604 50%, #000 100%)",
-        color: "#d4c5a0",
-      }}
-    >
-      <style>{`
+      <div
+          className="min-h-screen w-full"
+          style={{
+            background:
+                "radial-gradient(ellipse at top, #1a0f08 0%, #0a0604 50%, #000 100%)",
+            color: "#d4c5a0",
+          }}
+      >
+        <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap');
         .display-font { font-family: 'Cinzel', serif; }
         .body-font { font-family: 'Cormorant Garamond', serif; }
@@ -4566,909 +4762,909 @@ export default function App() {
         .scan { background: repeating-linear-gradient(0deg, transparent 0px, transparent 2px, rgba(0,0,0,0.04) 2px, rgba(0,0,0,0.04) 3px); }
       `}</style>
 
-      <div className="max-w-6xl mx-auto p-4 md:p-8 grain">
-        {/* HEADER */}
-        <div className="mb-8 text-center pb-6 border-b border-stone-900 relative scan">
-          <div className="mono-font text-[10px] tracking-[0.4em] text-stone-700 mb-3">
-            ⊕ ADEPTUS ADMINISTRATUM ⊕ ORDO TACTICUS ⊕ FORM 666-Δ
-          </div>
-          <h1 className="display-font text-5xl md:text-7xl font-bold tracking-wider mb-2"
-            style={{
-              background: "linear-gradient(180deg, #f5d76e 0%, #c9b037 50%, #8b6914 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-            }}
-          >
-            ARMY FORGE
-          </h1>
-          <div className="display-font text-sm tracking-[0.3em] text-stone-500 italic">
-            ⸺ M41 · TACTICAL DEPLOYMENT GENERATOR ⸺
-          </div>
-        </div>
-
-        {/* CONTROL PANEL */}
-        <div className="mb-8 p-6 md:p-8 border" style={{ background: "rgba(20,12,6,0.6)", borderColor: "#2a1f15" }}>
-          {/* FACTION */}
-          <div className="mb-8">
-            <div className="display-font text-xs tracking-[0.3em] mb-3" style={{ color: factionData.accent }}>
-              ◆ FACTION
+        <div className="max-w-6xl mx-auto p-4 md:p-8 grain">
+          {/* HEADER */}
+          <div className="mb-8 text-center pb-6 border-b border-stone-900 relative scan">
+            <div className="mono-font text-[10px] tracking-[0.4em] text-stone-700 mb-3">
+              ⊕ ADEPTUS ADMINISTRATUM ⊕ ORDO TACTICUS ⊕ FORM 666-Δ
             </div>
-            <button
-              onClick={() => setFactionPickerOpen((o) => !o)}
-              className="w-full p-4 border flex items-center justify-between"
-              style={{ background: `${factionData.color}33`, borderColor: factionData.accent }}
+            <h1 className="display-font text-5xl md:text-7xl font-bold tracking-wider mb-2"
+                style={{
+                  background: "linear-gradient(180deg, #f5d76e 0%, #c9b037 50%, #8b6914 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
             >
-              <div className="flex items-center gap-4">
-                <span className="text-3xl" style={{ color: factionData.accent }}>{factionData.icon}</span>
-                <div className="text-left">
-                  <div className="display-font text-lg font-bold tracking-wider" style={{ color: factionData.accent }}>
-                    {faction.toUpperCase()}
-                  </div>
-                  <div className="display-font text-xs italic text-stone-500">"{factionData.motto}"</div>
-                </div>
+              ARMY FORGE
+            </h1>
+            <div className="display-font text-sm tracking-[0.3em] text-stone-500 italic">
+              ⸺ M41 · TACTICAL DEPLOYMENT GENERATOR ⸺
+            </div>
+          </div>
+
+          {/* CONTROL PANEL */}
+          <div className="mb-8 p-6 md:p-8 border" style={{ background: "rgba(20,12,6,0.6)", borderColor: "#2a1f15" }}>
+            {/* FACTION */}
+            <div className="mb-8">
+              <div className="display-font text-xs tracking-[0.3em] mb-3" style={{ color: factionData.accent }}>
+                ◆ FACTION
               </div>
-              <span className="mono-font text-xs tracking-widest" style={{ color: factionData.accent }}>
+              <button
+                  onClick={() => setFactionPickerOpen((o) => !o)}
+                  className="w-full p-4 border flex items-center justify-between"
+                  style={{ background: `${factionData.color}33`, borderColor: factionData.accent }}
+              >
+                <div className="flex items-center gap-4">
+                  <span className="text-3xl" style={{ color: factionData.accent }}>{factionData.icon}</span>
+                  <div className="text-left">
+                    <div className="display-font text-lg font-bold tracking-wider" style={{ color: factionData.accent }}>
+                      {faction.toUpperCase()}
+                    </div>
+                    <div className="display-font text-xs italic text-stone-500">"{factionData.motto}"</div>
+                  </div>
+                </div>
+                <span className="mono-font text-xs tracking-widest" style={{ color: factionData.accent }}>
                 {factionPickerOpen ? "▲ CLOSE" : "▼ CHANGE"}
               </span>
-            </button>
-            {factionPickerOpen && (
-              <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                {Object.entries(FACTIONS).map(([name, data]) => {
-                  const active = name === faction;
-                  return (
-                    <button
-                      key={name}
-                      onClick={() => { setFaction(name); setFactionPickerOpen(false); }}
-                      className="p-3 border flex items-center gap-2 text-left"
-                      style={{
-                        background: active ? `${data.color}55` : "rgba(0,0,0,0.4)",
-                        borderColor: active ? data.accent : "#2a1f15",
-                      }}
-                    >
-                      <span className="text-xl flex-shrink-0" style={{ color: data.accent }}>{data.icon}</span>
-                      <div className="min-w-0 flex-1">
-                        <div className="display-font text-[11px] font-bold tracking-wider truncate"
-                          style={{ color: active ? data.accent : "#8a7a5a" }}>
-                          {name.toUpperCase()}
-                        </div>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
-          {/* SAVED ARMIES */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-              <div className="display-font text-xs tracking-[0.3em]" style={{ color: factionData.accent }}>
-                ⚔ SAVED ARMY LISTS {savedArmies.length > 0 && `(${savedArmies.length})`}
-              </div>
-              <div className="flex gap-1.5 flex-wrap">
-                <button onClick={handleSaveArmy}
-                  disabled={!army}
-                  className="mono-font text-[10px] tracking-widest px-3 py-1 border"
-                  style={{
-                    background: army ? factionData.accent : "transparent",
-                    color: army ? "#0a0806" : "#3a2818",
-                    borderColor: army ? factionData.accent : "#2a1f15",
-                    cursor: army ? "pointer" : "not-allowed",
-                  }}>
-                  ✚ SAVE CURRENT
-                </button>
-                <button onClick={handleExportArmy}
-                  disabled={!army}
-                  className="mono-font text-[10px] tracking-widest px-3 py-1 border"
-                  style={{
-                    color: army ? "#d4c5a0" : "#3a2818",
-                    borderColor: "#2a1f15",
-                    cursor: army ? "pointer" : "not-allowed",
-                  }}>
-                  ↗ EXPORT
-                </button>
-                <button onClick={() => { setImportMode((m) => !m); setExportMode(false); }}
-                  className="mono-font text-[10px] tracking-widest px-3 py-1 border"
-                  style={{
-                    background: importMode ? factionData.accent : "transparent",
-                    color: importMode ? "#0a0806" : "#d4c5a0",
-                    borderColor: "#2a1f15",
-                  }}>
-                  ↙ IMPORT
-                </button>
-                <button onClick={() => setSavedPanelOpen((o) => !o)}
-                  disabled={savedArmies.length === 0}
-                  className="mono-font text-[10px] tracking-widest px-3 py-1 border"
-                  style={{
-                    background: savedPanelOpen ? factionData.accent : "transparent",
-                    color: savedPanelOpen ? "#0a0806" : (savedArmies.length === 0 ? "#3a2818" : "#d4c5a0"),
-                    borderColor: "#2a1f15",
-                    cursor: savedArmies.length === 0 ? "not-allowed" : "pointer",
-                  }}>
-                  {savedPanelOpen ? "▲ HIDE" : `▼ LIST ${savedArmies.length > 0 ? `(${savedArmies.length})` : ""}`}
-                </button>
-              </div>
+              </button>
+              {factionPickerOpen && (
+                  <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                    {Object.entries(FACTIONS).map(([name, data]) => {
+                      const active = name === faction;
+                      return (
+                          <button
+                              key={name}
+                              onClick={() => { setFaction(name); setFactionPickerOpen(false); }}
+                              className="p-3 border flex items-center gap-2 text-left"
+                              style={{
+                                background: active ? `${data.color}55` : "rgba(0,0,0,0.4)",
+                                borderColor: active ? data.accent : "#2a1f15",
+                              }}
+                          >
+                            <span className="text-xl flex-shrink-0" style={{ color: data.accent }}>{data.icon}</span>
+                            <div className="min-w-0 flex-1">
+                              <div className="display-font text-[11px] font-bold tracking-wider truncate"
+                                   style={{ color: active ? data.accent : "#8a7a5a" }}>
+                                {name.toUpperCase()}
+                              </div>
+                            </div>
+                          </button>
+                      );
+                    })}
+                  </div>
+              )}
             </div>
 
-            {savedStatus && (
-              <div className="mono-font text-[11px] mb-2 italic tracking-wider" style={{ color: factionData.accent }}>
-                ◆ {savedStatus}
-              </div>
-            )}
-
-            {!storageAvailable && (
-              <div className="mono-font text-[10px] mb-2 italic" style={{ color: "#a05050" }}>
-                ⚠ Persistent storage unavailable in this environment — armies will not survive a reload. Use Export/Import to keep lists.
-              </div>
-            )}
-
-            {/* EXPORT BLOCK */}
-            {exportMode && exportText && (
-              <div className="border p-4 mb-3" style={{ borderColor: "#2a1f15", background: "rgba(0,0,0,0.4)" }}>
-                <div className="flex justify-between items-center mb-2 flex-wrap gap-2">
-                  <div className="mono-font text-[10px] tracking-widest" style={{ color: factionData.accent }}>
-                    ◆ EXPORT TEXT — COPY AND SHARE
-                  </div>
-                  <div className="flex gap-1.5">
-                    <button onClick={handleCopyExport}
-                      className="mono-font text-[10px] tracking-widest px-3 py-1 border"
-                      style={{ background: factionData.accent, color: "#0a0806", borderColor: factionData.accent }}>
-                      ❐ COPY
-                    </button>
-                    <button onClick={() => setExportMode(false)}
-                      className="mono-font text-[10px] tracking-widest px-3 py-1 border"
-                      style={{ color: "#8a7a5a", borderColor: "#2a1f15" }}>
-                      ✕ CLOSE
-                    </button>
-                  </div>
+            {/* SAVED ARMIES */}
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+                <div className="display-font text-xs tracking-[0.3em]" style={{ color: factionData.accent }}>
+                  ⚔ SAVED ARMY LISTS {savedArmies.length > 0 && `(${savedArmies.length})`}
                 </div>
-                <textarea value={exportText} readOnly
-                  className="w-full mono-font text-[11px] p-3"
-                  style={{
-                    background: "rgba(0,0,0,0.6)",
-                    color: "#d4c5a0",
-                    border: "1px solid #2a1f15",
-                    minHeight: "180px",
-                    resize: "vertical",
-                  }}
-                />
-              </div>
-            )}
-
-            {/* IMPORT BLOCK */}
-            {importMode && (
-              <div className="border p-4 mb-3" style={{ borderColor: "#2a1f15", background: "rgba(0,0,0,0.4)" }}>
-                <div className="flex justify-between items-center mb-2 flex-wrap gap-2">
-                  <div className="mono-font text-[10px] tracking-widest" style={{ color: factionData.accent }}>
-                    ◆ PASTE EXPORTED ARMY LIST
-                  </div>
-                  <div className="flex gap-1.5">
-                    <button onClick={handleImportArmy}
-                      className="mono-font text-[10px] tracking-widest px-3 py-1 border"
-                      style={{ background: factionData.accent, color: "#0a0806", borderColor: factionData.accent }}>
-                      ✓ LOAD
-                    </button>
-                    <button onClick={() => { setImportMode(false); setImportText(""); }}
-                      className="mono-font text-[10px] tracking-widest px-3 py-1 border"
-                      style={{ color: "#8a7a5a", borderColor: "#2a1f15" }}>
-                      ✕ CANCEL
-                    </button>
-                  </div>
+                <div className="flex gap-1.5 flex-wrap">
+                  <button onClick={handleSaveArmy}
+                          disabled={!army}
+                          className="mono-font text-[10px] tracking-widest px-3 py-1 border"
+                          style={{
+                            background: army ? factionData.accent : "transparent",
+                            color: army ? "#0a0806" : "#3a2818",
+                            borderColor: army ? factionData.accent : "#2a1f15",
+                            cursor: army ? "pointer" : "not-allowed",
+                          }}>
+                    ✚ SAVE CURRENT
+                  </button>
+                  <button onClick={handleExportArmy}
+                          disabled={!army}
+                          className="mono-font text-[10px] tracking-widest px-3 py-1 border"
+                          style={{
+                            color: army ? "#d4c5a0" : "#3a2818",
+                            borderColor: "#2a1f15",
+                            cursor: army ? "pointer" : "not-allowed",
+                          }}>
+                    ↗ EXPORT
+                  </button>
+                  <button onClick={() => { setImportMode((m) => !m); setExportMode(false); }}
+                          className="mono-font text-[10px] tracking-widest px-3 py-1 border"
+                          style={{
+                            background: importMode ? factionData.accent : "transparent",
+                            color: importMode ? "#0a0806" : "#d4c5a0",
+                            borderColor: "#2a1f15",
+                          }}>
+                    ↙ IMPORT
+                  </button>
+                  <button onClick={() => setSavedPanelOpen((o) => !o)}
+                          disabled={savedArmies.length === 0}
+                          className="mono-font text-[10px] tracking-widest px-3 py-1 border"
+                          style={{
+                            background: savedPanelOpen ? factionData.accent : "transparent",
+                            color: savedPanelOpen ? "#0a0806" : (savedArmies.length === 0 ? "#3a2818" : "#d4c5a0"),
+                            borderColor: "#2a1f15",
+                            cursor: savedArmies.length === 0 ? "not-allowed" : "pointer",
+                          }}>
+                    {savedPanelOpen ? "▲ HIDE" : `▼ LIST ${savedArmies.length > 0 ? `(${savedArmies.length})` : ""}`}
+                  </button>
                 </div>
-                <textarea value={importText}
-                  onChange={(e) => setImportText(e.target.value)}
-                  placeholder="Paste the entire export block (or just the JSON)..."
-                  className="w-full mono-font text-[11px] p-3"
-                  style={{
-                    background: "rgba(0,0,0,0.6)",
-                    color: "#d4c5a0",
-                    border: "1px solid #2a1f15",
-                    minHeight: "120px",
-                    resize: "vertical",
-                  }}
-                />
               </div>
-            )}
 
-            {/* SAVED LIST */}
-            {savedPanelOpen && savedArmies.length > 0 && (
-              <div className="border p-3" style={{ borderColor: "#2a1f15", background: "rgba(0,0,0,0.3)" }}>
-                <div className="space-y-2">
-                  {savedArmies.map((entry) => {
-                    const fdata = FACTIONS[entry.snapshot.faction];
-                    const isRenaming = renamingKey === entry.key;
-                    const totalPts = (entry.snapshot.spent || 0) + (entry.snapshot.enhancementSpend || 0);
-                    return (
-                      <div key={entry.key} className="border p-3"
-                        style={{
-                          background: "rgba(0,0,0,0.4)",
-                          borderColor: fdata?.accent || "#2a1f15",
-                          borderLeftWidth: "3px",
-                        }}>
-                        <div className="flex items-center justify-between gap-3 flex-wrap">
-                          <div className="flex items-center gap-3 min-w-0 flex-1">
+              {savedStatus && (
+                  <div className="mono-font text-[11px] mb-2 italic tracking-wider" style={{ color: factionData.accent }}>
+                    ◆ {savedStatus}
+                  </div>
+              )}
+
+              {!storageAvailable && (
+                  <div className="mono-font text-[10px] mb-2 italic" style={{ color: "#a05050" }}>
+                    ⚠ Persistent storage unavailable in this environment — armies will not survive a reload. Use Export/Import to keep lists.
+                  </div>
+              )}
+
+              {/* EXPORT BLOCK */}
+              {exportMode && exportText && (
+                  <div className="border p-4 mb-3" style={{ borderColor: "#2a1f15", background: "rgba(0,0,0,0.4)" }}>
+                    <div className="flex justify-between items-center mb-2 flex-wrap gap-2">
+                      <div className="mono-font text-[10px] tracking-widest" style={{ color: factionData.accent }}>
+                        ◆ EXPORT TEXT — COPY AND SHARE
+                      </div>
+                      <div className="flex gap-1.5">
+                        <button onClick={handleCopyExport}
+                                className="mono-font text-[10px] tracking-widest px-3 py-1 border"
+                                style={{ background: factionData.accent, color: "#0a0806", borderColor: factionData.accent }}>
+                          ❐ COPY
+                        </button>
+                        <button onClick={() => setExportMode(false)}
+                                className="mono-font text-[10px] tracking-widest px-3 py-1 border"
+                                style={{ color: "#8a7a5a", borderColor: "#2a1f15" }}>
+                          ✕ CLOSE
+                        </button>
+                      </div>
+                    </div>
+                    <textarea value={exportText} readOnly
+                              className="w-full mono-font text-[11px] p-3"
+                              style={{
+                                background: "rgba(0,0,0,0.6)",
+                                color: "#d4c5a0",
+                                border: "1px solid #2a1f15",
+                                minHeight: "180px",
+                                resize: "vertical",
+                              }}
+                    />
+                  </div>
+              )}
+
+              {/* IMPORT BLOCK */}
+              {importMode && (
+                  <div className="border p-4 mb-3" style={{ borderColor: "#2a1f15", background: "rgba(0,0,0,0.4)" }}>
+                    <div className="flex justify-between items-center mb-2 flex-wrap gap-2">
+                      <div className="mono-font text-[10px] tracking-widest" style={{ color: factionData.accent }}>
+                        ◆ PASTE EXPORTED ARMY LIST
+                      </div>
+                      <div className="flex gap-1.5">
+                        <button onClick={handleImportArmy}
+                                className="mono-font text-[10px] tracking-widest px-3 py-1 border"
+                                style={{ background: factionData.accent, color: "#0a0806", borderColor: factionData.accent }}>
+                          ✓ LOAD
+                        </button>
+                        <button onClick={() => { setImportMode(false); setImportText(""); }}
+                                className="mono-font text-[10px] tracking-widest px-3 py-1 border"
+                                style={{ color: "#8a7a5a", borderColor: "#2a1f15" }}>
+                          ✕ CANCEL
+                        </button>
+                      </div>
+                    </div>
+                    <textarea value={importText}
+                              onChange={(e) => setImportText(e.target.value)}
+                              placeholder="Paste the entire export block (or just the JSON)..."
+                              className="w-full mono-font text-[11px] p-3"
+                              style={{
+                                background: "rgba(0,0,0,0.6)",
+                                color: "#d4c5a0",
+                                border: "1px solid #2a1f15",
+                                minHeight: "120px",
+                                resize: "vertical",
+                              }}
+                    />
+                  </div>
+              )}
+
+              {/* SAVED LIST */}
+              {savedPanelOpen && savedArmies.length > 0 && (
+                  <div className="border p-3" style={{ borderColor: "#2a1f15", background: "rgba(0,0,0,0.3)" }}>
+                    <div className="space-y-2">
+                      {savedArmies.map((entry) => {
+                        const fdata = FACTIONS[entry.snapshot.faction];
+                        const isRenaming = renamingKey === entry.key;
+                        const totalPts = (entry.snapshot.spent || 0) + (entry.snapshot.enhancementSpend || 0);
+                        return (
+                            <div key={entry.key} className="border p-3"
+                                 style={{
+                                   background: "rgba(0,0,0,0.4)",
+                                   borderColor: fdata?.accent || "#2a1f15",
+                                   borderLeftWidth: "3px",
+                                 }}>
+                              <div className="flex items-center justify-between gap-3 flex-wrap">
+                                <div className="flex items-center gap-3 min-w-0 flex-1">
                             <span className="text-xl flex-shrink-0" style={{ color: fdata?.accent }}>
                               {fdata?.icon}
                             </span>
-                            <div className="min-w-0 flex-1">
-                              {isRenaming ? (
-                                <input value={renameDraft}
-                                  onChange={(e) => setRenameDraft(e.target.value)}
-                                  onKeyDown={(e) => {
-                                    if (e.key === "Enter") handleRenameArmy(entry);
-                                    if (e.key === "Escape") { setRenamingKey(null); setRenameDraft(""); }
-                                  }}
-                                  autoFocus
-                                  className="mono-font text-sm w-full px-2 py-1"
-                                  style={{ background: "rgba(0,0,0,0.6)", color: fdata?.accent, border: `1px solid ${fdata?.accent}` }}
-                                />
-                              ) : (
-                                <div className="display-font text-sm font-semibold truncate" style={{ color: fdata?.accent }}>
-                                  {entry.name}
+                                  <div className="min-w-0 flex-1">
+                                    {isRenaming ? (
+                                        <input value={renameDraft}
+                                               onChange={(e) => setRenameDraft(e.target.value)}
+                                               onKeyDown={(e) => {
+                                                 if (e.key === "Enter") handleRenameArmy(entry);
+                                                 if (e.key === "Escape") { setRenamingKey(null); setRenameDraft(""); }
+                                               }}
+                                               autoFocus
+                                               className="mono-font text-sm w-full px-2 py-1"
+                                               style={{ background: "rgba(0,0,0,0.6)", color: fdata?.accent, border: `1px solid ${fdata?.accent}` }}
+                                        />
+                                    ) : (
+                                        <div className="display-font text-sm font-semibold truncate" style={{ color: fdata?.accent }}>
+                                          {entry.name}
+                                        </div>
+                                    )}
+                                    <div className="mono-font text-[10px] text-stone-500 mt-0.5 tracking-wider">
+                                      {entry.snapshot.subFaction} · {entry.snapshot.detachment} · {totalPts}pts · {(entry.snapshot.units || []).length} units
+                                      {entry.savedAt && (
+                                          <span className="ml-2 text-stone-600">{new Date(entry.savedAt).toLocaleDateString()}</span>
+                                      )}
+                                    </div>
+                                  </div>
                                 </div>
-                              )}
-                              <div className="mono-font text-[10px] text-stone-500 mt-0.5 tracking-wider">
-                                {entry.snapshot.subFaction} · {entry.snapshot.detachment} · {totalPts}pts · {(entry.snapshot.units || []).length} units
-                                {entry.savedAt && (
-                                  <span className="ml-2 text-stone-600">{new Date(entry.savedAt).toLocaleDateString()}</span>
-                                )}
+                                <div className="flex gap-1.5 flex-wrap">
+                                  {isRenaming ? (
+                                      <>
+                                        <button onClick={() => handleRenameArmy(entry)}
+                                                className="mono-font text-[10px] tracking-widest px-2 py-1 border"
+                                                style={{ background: fdata?.accent, color: "#0a0806", borderColor: fdata?.accent }}>
+                                          ✓ SAVE
+                                        </button>
+                                        <button onClick={() => { setRenamingKey(null); setRenameDraft(""); }}
+                                                className="mono-font text-[10px] tracking-widest px-2 py-1 border"
+                                                style={{ color: "#8a7a5a", borderColor: "#2a1f15" }}>
+                                          ✕
+                                        </button>
+                                      </>
+                                  ) : (
+                                      <>
+                                        <button onClick={() => handleLoadArmy(entry)}
+                                                className="mono-font text-[10px] tracking-widest px-2 py-1 border"
+                                                style={{ background: fdata?.accent, color: "#0a0806", borderColor: fdata?.accent }}>
+                                          ▶ LOAD
+                                        </button>
+                                        <button onClick={() => { setRenamingKey(entry.key); setRenameDraft(entry.name); }}
+                                                className="mono-font text-[10px] tracking-widest px-2 py-1 border"
+                                                style={{ color: "#d4c5a0", borderColor: "#2a1f15" }}>
+                                          ✎ RENAME
+                                        </button>
+                                        <button onClick={() => handleDeleteArmy(entry)}
+                                                className="mono-font text-[10px] tracking-widest px-2 py-1 border"
+                                                style={{ color: "#a05050", borderColor: "#3a1818" }}>
+                                          ✕ DELETE
+                                        </button>
+                                      </>
+                                  )}
+                                </div>
                               </div>
                             </div>
-                          </div>
-                          <div className="flex gap-1.5 flex-wrap">
-                            {isRenaming ? (
-                              <>
-                                <button onClick={() => handleRenameArmy(entry)}
-                                  className="mono-font text-[10px] tracking-widest px-2 py-1 border"
-                                  style={{ background: fdata?.accent, color: "#0a0806", borderColor: fdata?.accent }}>
-                                  ✓ SAVE
-                                </button>
-                                <button onClick={() => { setRenamingKey(null); setRenameDraft(""); }}
-                                  className="mono-font text-[10px] tracking-widest px-2 py-1 border"
-                                  style={{ color: "#8a7a5a", borderColor: "#2a1f15" }}>
-                                  ✕
-                                </button>
-                              </>
-                            ) : (
-                              <>
-                                <button onClick={() => handleLoadArmy(entry)}
-                                  className="mono-font text-[10px] tracking-widest px-2 py-1 border"
-                                  style={{ background: fdata?.accent, color: "#0a0806", borderColor: fdata?.accent }}>
-                                  ▶ LOAD
-                                </button>
-                                <button onClick={() => { setRenamingKey(entry.key); setRenameDraft(entry.name); }}
-                                  className="mono-font text-[10px] tracking-widest px-2 py-1 border"
-                                  style={{ color: "#d4c5a0", borderColor: "#2a1f15" }}>
-                                  ✎ RENAME
-                                </button>
-                                <button onClick={() => handleDeleteArmy(entry)}
-                                  className="mono-font text-[10px] tracking-widest px-2 py-1 border"
-                                  style={{ color: "#a05050", borderColor: "#3a1818" }}>
-                                  ✕ DELETE
-                                </button>
-                              </>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+                        );
+                      })}
+                    </div>
+                  </div>
+              )}
 
-            {savedPanelOpen && savedArmies.length === 0 && (
-              <div className="border border-dashed p-4 text-center mono-font text-[11px] tracking-wider" 
-                style={{ borderColor: "#2a1f15", color: "#8a7a5a" }}>
-                NO SAVED LISTS · GENERATE AND SAVE AN ARMY TO BEGIN
-              </div>
-            )}
-          </div>
-
-          {/* SUB-FACTION & DETACHMENT */}
-          <div className="grid md:grid-cols-2 gap-6 mb-8">
-            <div>
-              <div className="display-font text-xs tracking-[0.3em] mb-3" style={{ color: factionData.accent }}>
-                ◆ SUB-FACTION / CHAPTER
-              </div>
-              <select className="gothic" value={subFaction} onChange={(e) => setSubFaction(e.target.value)}
-                style={{ "--accent": factionData.accent }}>
-                {Object.keys(factionData.subFactions).map((sf) => (
-                  <option key={sf} value={sf}>{sf}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <div className="display-font text-xs tracking-[0.3em] mb-3" style={{ color: factionData.accent }}>
-                ◆ DETACHMENT
-              </div>
-              <select className="gothic" value={detachment} onChange={(e) => setDetachment(e.target.value)}
-                style={{ "--accent": factionData.accent }}>
-                {Object.keys(factionData.detachments).map((d) => (
-                  <option key={d} value={d}>{d}</option>
-                ))}
-              </select>
-              {detachmentData && (
-                <div className="mono-font text-[10px] italic mt-2 leading-relaxed" style={{ color: "#8a7a5a" }}>
-                  ↳ {detachmentData.rule}
-                </div>
+              {savedPanelOpen && savedArmies.length === 0 && (
+                  <div className="border border-dashed p-4 text-center mono-font text-[11px] tracking-wider"
+                       style={{ borderColor: "#2a1f15", color: "#8a7a5a" }}>
+                    NO SAVED LISTS · GENERATE AND SAVE AN ARMY TO BEGIN
+                  </div>
               )}
             </div>
-          </div>
 
-          {/* POINTS & DOCTRINE */}
-          <div className="grid md:grid-cols-2 gap-8 mb-8">
-            <div>
-              <div className="display-font text-xs tracking-[0.3em] mb-4" style={{ color: factionData.accent }}>
-                ⸺ POINT LIMIT
-              </div>
-              <div className="flex items-baseline gap-3 mb-3">
-                <span className="display-font text-5xl font-bold" style={{ color: "#e8d77a" }}>
-                  {points}
-                </span>
-                <span className="mono-font text-xs tracking-widest text-stone-600">PTS</span>
-              </div>
-              <input type="range" min="500" max="3000" step="50" value={points}
-                onChange={(e) => setPoints(parseInt(e.target.value))}
-                className="w-full" style={{ "--accent": factionData.accent }}
-              />
-              <div className="flex justify-between mono-font text-[10px] text-stone-700 mt-2 tracking-wider">
-                <span>500 · COMBAT PATROL</span>
-                <span>2000 · STRIKE FORCE</span>
-                <span>3000 · ONSLAUGHT</span>
-              </div>
-            </div>
-            <div>
-              <div className="display-font text-xs tracking-[0.3em] mb-4" style={{ color: factionData.accent }}>
-                ⸺ DOCTRINE
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                {Object.entries(ARMY_TYPES).map(([key, type]) => {
-                  const active = key === armyType;
-                  return (
-                    <button key={key} onClick={() => setArmyType(key)} className="p-2 text-left border"
-                      style={{
-                        background: active ? `${factionData.accent}1a` : "transparent",
-                        borderColor: active ? factionData.accent : "#2a1f15",
-                      }}
-                    >
-                      <div className="display-font text-xs font-semibold tracking-wider"
-                        style={{ color: active ? factionData.accent : "#8a7a5a" }}>
-                        {type.label.toUpperCase()}
-                      </div>
-                      <div className="text-[10px] text-stone-600 italic mt-0.5 leading-tight">
-                        {type.description}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
-          {/* REQUIRED ROLES */}
-          <div className="mb-8">
-            <div className="display-font text-xs tracking-[0.3em] mb-4" style={{ color: factionData.accent }}>
-              ⸺ REQUIRED BATTLEFIELD ROLES
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {Object.entries(ROLE_LABELS).map(([key, label]) => {
-                const active = requiredRoles.includes(key);
-                return (
-                  <button key={key} onClick={() => toggleRole(key)}
-                    className="px-4 py-2 mono-font text-xs tracking-widest border"
-                    style={{
-                      background: active ? factionData.accent : "transparent",
-                      color: active ? "#0a0806" : "#8a7a5a",
-                      borderColor: active ? factionData.accent : "#2a1f15",
-                    }}
-                  >
-                    {active ? "▣" : "▢"} {label.toUpperCase()}
-                  </button>
-                );
-              })}
-            </div>
-            <div className="text-[11px] text-stone-600 italic mt-2">
-              HQ is always included. Selected roles are guaranteed at least one unit.
-            </div>
-          </div>
-
-          {/* COMBO PACKAGES */}
-          {combos.length > 0 && (
-            <div className="mb-8">
-              <div className="display-font text-xs tracking-[0.3em] mb-4" style={{ color: factionData.accent }}>
-                ⚜ CORE COMBOS · CURATED UNIT PACKAGES
-              </div>
-              <div className="grid md:grid-cols-2 gap-2">
-                {combos.map((combo) => {
-                  const active = selectedCombo === combo.name;
-                  return (
-                    <button
-                      key={combo.name}
-                      onClick={() => selectCombo(combo.name)}
-                      className="p-3 text-left border"
-                      style={{
-                        background: active ? `${factionData.accent}1a` : "rgba(0,0,0,0.4)",
-                        borderColor: active ? factionData.accent : "#2a1f15",
-                      }}
-                    >
-                      <div className="display-font text-sm font-semibold tracking-wide flex items-center gap-2"
-                        style={{ color: active ? factionData.accent : "#d4c5a0" }}>
-                        {active ? "▣" : "▢"} {combo.name}
-                      </div>
-                      <div className="text-[11px] text-stone-500 italic mt-1 leading-tight">
-                        {combo.description}
-                      </div>
-                      <div className="mono-font text-[10px] text-stone-600 mt-2 leading-relaxed">
-                        ↳ {combo.units.join(" · ")}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-              {selectedCombo && (
-                <div className="mono-font text-[11px] mt-3 text-right tracking-wider" style={{ color: factionData.accent }}>
-                  ✦ COMBO LOCKED IN — UNITS WILL BE PINNED
+            {/* SUB-FACTION & DETACHMENT */}
+            <div className="grid md:grid-cols-2 gap-6 mb-8">
+              <div>
+                <div className="display-font text-xs tracking-[0.3em] mb-3" style={{ color: factionData.accent }}>
+                  ◆ SUB-FACTION / CHAPTER
                 </div>
-              )}
-            </div>
-          )}
-
-          {/* PIN INDIVIDUAL UNITS */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-              <div className="display-font text-xs tracking-[0.3em]" style={{ color: factionData.accent }}>
-                ⚒ PIN UNITS · MUST-INCLUDE LIST {pinnedUnits.length > 0 && `(${pinnedUnits.length})`}
+                <select className="gothic" value={subFaction} onChange={(e) => setSubFaction(e.target.value)}
+                        style={{ "--accent": factionData.accent }}>
+                  {Object.keys(factionData.subFactions).map((sf) => (
+                      <option key={sf} value={sf}>{sf}</option>
+                  ))}
+                </select>
               </div>
-              <button onClick={() => setPinPanelOpen((o) => !o)}
-                className="mono-font text-[10px] tracking-widest px-3 py-1 border"
-                style={{
-                  background: pinPanelOpen ? factionData.accent : "transparent",
-                  color: pinPanelOpen ? "#0a0806" : "#8a7a5a",
-                  borderColor: factionData.accent,
-                }}
-              >
-                {pinPanelOpen ? "▲ COLLAPSE" : "▼ EXPAND"}
-              </button>
-            </div>
-
-            {pinnedUnits.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-3">
-                {pinnedUnits.map((name) => {
-                  const def = unitLookup[name];
-                  return (
-                    <button
-                      key={name}
-                      onClick={() => togglePinnedUnit(name)}
-                      className="mono-font text-[11px] tracking-wider px-3 py-1 border flex items-center gap-2"
-                      style={{ background: `${factionData.accent}22`, borderColor: factionData.accent, color: factionData.accent }}
-                    >
-                      ✦ {name} {def && <span className="text-stone-500">({def.points}pts)</span>} <span className="text-stone-500">✕</span>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-
-            {pinPanelOpen && (
-              <div className="border p-4" style={{ borderColor: "#2a1f15", background: "rgba(0,0,0,0.3)" }}>
-                {/* Role tabs */}
-                <div className="flex flex-wrap gap-1 mb-3">
-                  {Object.entries(ROLE_LABELS).map(([key, label]) => {
-                    const active = pinSearchRole === key;
-                    const count = (currentUnitPool[key] || []).length;
-                    if (count === 0) return null;
-                    return (
-                      <button key={key} onClick={() => setPinSearchRole(key)}
-                        className="mono-font text-[10px] tracking-widest px-3 py-1 border"
-                        style={{
-                          background: active ? factionData.accent : "transparent",
-                          color: active ? "#0a0806" : "#8a7a5a",
-                          borderColor: active ? factionData.accent : "#2a1f15",
-                        }}
-                      >
-                        {label.toUpperCase()} · {count}
-                      </button>
-                    );
-                  })}
+              <div>
+                <div className="display-font text-xs tracking-[0.3em] mb-3" style={{ color: factionData.accent }}>
+                  ◆ DETACHMENT
                 </div>
-
-                {/* Unit list for selected role */}
-                <div className="grid md:grid-cols-2 gap-1.5 max-h-96 overflow-y-auto">
-                  {(currentUnitPool[pinSearchRole] || []).map((u) => {
-                    const isPinned = pinnedUnits.includes(u.name);
-                    const synergies = getSynergyHints(u.name);
-                    return (
-                      <button
-                        key={u.name}
-                        onClick={() => togglePinnedUnit(u.name)}
-                        className="p-2 text-left border"
-                        style={{
-                          background: isPinned ? `${factionData.accent}22` : "rgba(0,0,0,0.4)",
-                          borderColor: isPinned ? factionData.accent : "#2a1f15",
-                        }}
-                      >
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="display-font text-[13px]"
-                            style={{ color: isPinned ? factionData.accent : "#d4c5a0" }}>
-                            {isPinned ? "▣" : "▢"} {u.name}
-                          </span>
-                          <span className="mono-font text-[11px]" style={{ color: factionData.accent }}>
-                            {u.points}<span className="text-stone-600 text-[9px] ml-0.5">pts</span>
-                          </span>
-                        </div>
-                        {synergies.length > 0 && (
-                          <div className="mono-font text-[9px] text-stone-500 mt-1 italic leading-tight">
-                            ↳ pairs well with: {synergies.slice(0, 3).join(", ")}
-                          </div>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-                <div className="text-[10px] text-stone-600 italic mt-2">
-                  Tip: pinning a leader will hint at units that synergize with them. The generator will fill the rest of the army around your pinned units.
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* ENHANCEMENTS */}
-          {detachmentData && detachmentData.enhancements.length > 0 && (
-            <div className="mb-8">
-              <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-                <div className="display-font text-xs tracking-[0.3em]" style={{ color: factionData.accent }}>
-                  ⸺ ENHANCEMENTS · {detachment}
-                </div>
-                <button onClick={() => setEnhancementsEnabled((e) => !e)}
-                  className="mono-font text-[10px] tracking-widest px-3 py-1 border"
-                  style={{
-                    background: enhancementsEnabled ? factionData.accent : "transparent",
-                    color: enhancementsEnabled ? "#0a0806" : "#8a7a5a",
-                    borderColor: factionData.accent,
-                  }}
-                >
-                  {enhancementsEnabled ? "▣ ENABLED" : "▢ DISABLED"}
-                </button>
-              </div>
-              <div className={`grid md:grid-cols-2 gap-2 transition-opacity ${
-                enhancementsEnabled ? "opacity-100" : "opacity-40 pointer-events-none"
-              }`}>
-                {detachmentData.enhancements.map((enh) => {
-                  const active = selectedEnhancements.includes(enh.name);
-                  return (
-                    <button key={enh.name} onClick={() => toggleEnhancement(enh.name)}
-                      className="p-3 text-left border flex items-start justify-between gap-2"
-                      style={{
-                        background: active ? `${factionData.accent}1a` : "rgba(0,0,0,0.4)",
-                        borderColor: active ? factionData.accent : "#2a1f15",
-                      }}
-                    >
-                      <div className="flex-1 min-w-0">
-                        <div className="display-font text-sm font-semibold tracking-wide"
-                          style={{ color: active ? factionData.accent : "#d4c5a0" }}>
-                          {active ? "▣" : "▢"} {enh.name}
-                        </div>
-                        <div className="mono-font text-[10px] text-stone-600 mt-1 tracking-wider uppercase">
-                          {enh.type}
-                        </div>
-                      </div>
-                      <div className="mono-font text-sm font-bold" style={{ color: factionData.accent }}>
-                        +{enh.points}<span className="text-stone-600 text-[10px] ml-0.5">pts</span>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-              {enhancementsEnabled && enhancementTotalCost > 0 && (
-                <div className="mono-font text-xs mt-3 text-right tracking-wider" style={{ color: factionData.accent }}>
-                  ENHANCEMENT BUDGET: {enhancementTotalCost} PTS
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* GENERATE BUTTON */}
-          <div className="flex justify-center">
-            <button onClick={handleGenerate} disabled={generating}
-              className="glow-button display-font px-12 py-4 text-sm tracking-[0.3em] font-bold border-2 transition-all"
-              style={{
-                background: `linear-gradient(180deg, ${factionData.color} 0%, #000 100%)`,
-                color: factionData.accent,
-                borderColor: factionData.accent,
-                cursor: generating ? "wait" : "pointer",
-              }}
-            >
-              {generating ? "✦ INVOKING THE MACHINE SPIRIT ✦" : "⚔ FORGE ARMY ⚔"}
-            </button>
-          </div>
-        </div>
-
-        {/* RESULTS */}
-        {army && (
-          <div id="results" className="border p-6 md:p-10"
-            style={{
-              background: `linear-gradient(180deg, ${army.factionData.color}22 0%, rgba(10,8,6,0.95) 50%)`,
-              borderColor: army.factionData.accent,
-              boxShadow: `0 0 40px ${army.factionData.accent}22`,
-            }}
-          >
-            <div className="text-center mb-8 pb-6 border-b" style={{ borderColor: "#3a2818" }}>
-              <div className="mono-font text-[10px] tracking-[0.4em] text-stone-600 mb-2">
-                ◆ ORDO TACTICUS · DOSSIER #{Math.floor(Math.random() * 9000 + 1000)} ◆
-              </div>
-              <div className="display-font text-5xl mb-2" style={{ color: army.factionData.accent }}>
-                {army.factionData.icon}
-              </div>
-              <h2 className="display-font text-3xl md:text-4xl font-bold mb-1" style={{ color: army.factionData.accent }}>
-                {army.faction.toUpperCase()}
-              </h2>
-              <div className="display-font text-sm tracking-widest text-stone-400 mb-1">
-                {army.subFaction.toUpperCase()}
-              </div>
-              <div className="display-font text-sm italic text-stone-500 mb-1">
-                "{army.factionData.motto}"
-              </div>
-              <div className="mono-font text-xs tracking-widest mt-3" style={{ color: army.factionData.accent }}>
-                ⟨ {army.detachment.toUpperCase()} ⟩
-              </div>
-              {army.comboName && (
-                <div className="mono-font text-[11px] tracking-widest mt-1 text-stone-500">
-                  ⚜ COMBO: {army.comboName.toUpperCase()}
-                </div>
-              )}
-              <div className="flex justify-center gap-6 md:gap-8 mt-4 flex-wrap">
-                <Stat label="Total" value={`${army.spent + army.enhancementSpend} / ${points}`} accent={army.factionData.accent} />
-                <Stat label="Units" value={army.units.length} accent={army.factionData.accent} />
-                <Stat label="Doctrine" value={ARMY_TYPES[armyType].label} accent={army.factionData.accent} />
-                {army.enhancementSpend > 0 && (
-                  <Stat label="Enhancements" value={`+${army.enhancementSpend}pts`} accent={army.factionData.accent} />
+                <select className="gothic" value={detachment} onChange={(e) => setDetachment(e.target.value)}
+                        style={{ "--accent": factionData.accent }}>
+                  {Object.keys(factionData.detachments).map((d) => (
+                      <option key={d} value={d}>{d}</option>
+                  ))}
+                </select>
+                {detachmentData && (
+                    <div className="mono-font text-[10px] italic mt-2 leading-relaxed" style={{ color: "#8a7a5a" }}>
+                      ↳ {detachmentData.rule}
+                    </div>
                 )}
               </div>
             </div>
 
-            {/* SELECTED ENHANCEMENTS */}
-            {army.selectedEnhancements && army.selectedEnhancements.length > 0 && (
-              <div className="mb-8">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="h-px flex-grow" style={{ background: `${army.factionData.accent}44` }} />
-                  <div className="display-font text-xs tracking-[0.3em] font-bold" style={{ color: army.factionData.accent }}>
-                    SELECTED ENHANCEMENTS · {army.selectedEnhancements.length}
-                  </div>
-                  <div className="h-px flex-grow" style={{ background: `${army.factionData.accent}44` }} />
+            {/* POINTS & DOCTRINE */}
+            <div className="grid md:grid-cols-2 gap-8 mb-8">
+              <div>
+                <div className="display-font text-xs tracking-[0.3em] mb-4" style={{ color: factionData.accent }}>
+                  ⸺ POINT LIMIT
                 </div>
-                <div className="grid md:grid-cols-2 gap-2">
-                  {army.selectedEnhancements.map((enhName, idx) => {
-                    const enh = army.factionData.detachments[army.detachment].enhancements.find((e) => e.name === enhName);
+                <div className="flex items-baseline gap-3 mb-3">
+                <span className="display-font text-5xl font-bold" style={{ color: "#e8d77a" }}>
+                  {points}
+                </span>
+                  <span className="mono-font text-xs tracking-widest text-stone-600">PTS</span>
+                </div>
+                <input type="range" min="500" max="3000" step="50" value={points}
+                       onChange={(e) => setPoints(parseInt(e.target.value))}
+                       className="w-full" style={{ "--accent": factionData.accent }}
+                />
+                <div className="flex justify-between mono-font text-[10px] text-stone-700 mt-2 tracking-wider">
+                  <span>500 · COMBAT PATROL</span>
+                  <span>2000 · STRIKE FORCE</span>
+                  <span>3000 · ONSLAUGHT</span>
+                </div>
+              </div>
+              <div>
+                <div className="display-font text-xs tracking-[0.3em] mb-4" style={{ color: factionData.accent }}>
+                  ⸺ DOCTRINE
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  {Object.entries(ARMY_TYPES).map(([key, type]) => {
+                    const active = key === armyType;
                     return (
-                      <div key={enhName} className="unit-card flex justify-between items-center px-4 py-3 border"
-                        style={{
-                          background: `${army.factionData.accent}11`,
-                          borderColor: army.factionData.accent,
-                          animationDelay: `${idx * 0.06}s`,
-                        }}
-                      >
-                        <div>
-                          <div className="display-font text-sm font-semibold" style={{ color: army.factionData.accent }}>
-                            ✦ {enhName}
+                        <button key={key} onClick={() => setArmyType(key)} className="p-2 text-left border"
+                                style={{
+                                  background: active ? `${factionData.accent}1a` : "transparent",
+                                  borderColor: active ? factionData.accent : "#2a1f15",
+                                }}
+                        >
+                          <div className="display-font text-xs font-semibold tracking-wider"
+                               style={{ color: active ? factionData.accent : "#8a7a5a" }}>
+                            {type.label.toUpperCase()}
                           </div>
-                          <div className="mono-font text-[10px] text-stone-600 mt-0.5 tracking-wider uppercase">
-                            {enh?.type}
+                          <div className="text-[10px] text-stone-600 italic mt-0.5 leading-tight">
+                            {type.description}
                           </div>
-                        </div>
-                        <div className="mono-font text-sm" style={{ color: "#d4c5a0" }}>
-                          {enh?.points}<span className="text-stone-600 text-xs ml-1">pts</span>
-                        </div>
-                      </div>
+                        </button>
                     );
                   })}
                 </div>
               </div>
-            )}
+            </div>
 
-            {/* EDITOR HEADER */}
-            <div className="mb-4 flex items-center justify-between flex-wrap gap-3">
-              <div className="display-font text-xs tracking-[0.3em]" style={{ color: army.factionData.accent }}>
-                ⚒ ARMY ROSTER · CLICK ANY UNIT TO EDIT
+            {/* REQUIRED ROLES */}
+            <div className="mb-8">
+              <div className="display-font text-xs tracking-[0.3em] mb-4" style={{ color: factionData.accent }}>
+                ⸺ REQUIRED BATTLEFIELD ROLES
               </div>
-              <div className="mono-font text-[11px] tracking-wider text-stone-500">
-                ◆ ◆ ◆
+              <div className="flex flex-wrap gap-2">
+                {Object.entries(ROLE_LABELS).map(([key, label]) => {
+                  const active = requiredRoles.includes(key);
+                  return (
+                      <button key={key} onClick={() => toggleRole(key)}
+                              className="px-4 py-2 mono-font text-xs tracking-widest border"
+                              style={{
+                                background: active ? factionData.accent : "transparent",
+                                color: active ? "#0a0806" : "#8a7a5a",
+                                borderColor: active ? factionData.accent : "#2a1f15",
+                              }}
+                      >
+                        {active ? "▣" : "▢"} {label.toUpperCase()}
+                      </button>
+                  );
+                })}
+              </div>
+              <div className="text-[11px] text-stone-600 italic mt-2">
+                HQ is always included. Selected roles are guaranteed at least one unit.
               </div>
             </div>
 
-            {/* UNITS BY ROLE — EDITABLE */}
-            {Object.entries(ROLE_LABELS).map(([role, label]) =>
-              groupedUnits && groupedUnits[role] ? (
-                <div key={role} className="mb-7">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="h-px flex-grow" style={{ background: `${army.factionData.accent}44` }} />
-                    <div className="display-font text-xs tracking-[0.3em] font-bold" style={{ color: army.factionData.accent }}>
-                      {label.toUpperCase()} · {groupedUnits[role].length}
-                    </div>
-                    <div className="h-px flex-grow" style={{ background: `${army.factionData.accent}44` }} />
-                    <button
-                      onClick={() => {
-                        // Add a random unit from this role
-                        const pool = currentUnitPool[role];
-                        if (!pool || pool.length === 0) return;
-                        // Find one not at max
-                        const available = pool.filter((u) => {
-                          const count = army.units.filter((existing) => existing.name === u.name).length;
-                          return count < u.max;
-                        });
-                        if (available.length === 0) return;
-                        const pick = available[Math.floor(Math.random() * available.length)];
-                        editorAddUnit(pick.name);
-                      }}
-                      className="mono-font text-[10px] tracking-widest px-2 py-1 border"
-                      style={{
-                        borderColor: army.factionData.accent,
-                        color: army.factionData.accent,
-                        background: "transparent",
-                      }}
-                    >
-                      + ADD
-                    </button>
+            {/* COMBO PACKAGES */}
+            {combos.length > 0 && (
+                <div className="mb-8">
+                  <div className="display-font text-xs tracking-[0.3em] mb-4" style={{ color: factionData.accent }}>
+                    ⚜ CORE COMBOS · CURATED UNIT PACKAGES
                   </div>
-                  <div className="space-y-2">
-                    {groupedUnits[role].map((unit, idx) => {
-                      const isSwapping = swapTarget && swapTarget.unitId === unit.id;
-                      const qty = unit.qty || 1;
-                      const synergies = getSynergyHints(unit.name);
+                  <div className="grid md:grid-cols-2 gap-2">
+                    {combos.map((combo) => {
+                      const active = selectedCombo === combo.name;
                       return (
-                        <div key={unit.id} className="unit-card border"
-                          style={{
-                            background: unit.pinned ? `${army.factionData.accent}11` : "rgba(0,0,0,0.4)",
-                            borderColor: unit.pinned ? army.factionData.accent : "#2a1f15",
-                            animationDelay: `${idx * 0.04}s`,
-                          }}
-                        >
-                          <div className="flex justify-between items-center px-4 py-3 gap-3 flex-wrap">
-                            <div className="flex items-center gap-3 min-w-0 flex-1">
-                              <span className="mono-font text-[10px] tracking-wider flex-shrink-0" style={{ color: army.factionData.accent }}>
-                                {String(idx + 1).padStart(2, "0")}
-                              </span>
-                              {unit.pinned && (
-                                <span className="mono-font text-[9px] px-1.5 py-0.5 border tracking-wider"
-                                  style={{ color: army.factionData.accent, borderColor: army.factionData.accent }}>
-                                  PINNED
-                                </span>
-                              )}
-                              <span className="display-font text-base text-stone-200 truncate">
-                                {unit.name}
-                                {qty > 1 && <span className="text-stone-500 ml-2">×{qty}</span>}
-                              </span>
+                          <button
+                              key={combo.name}
+                              onClick={() => selectCombo(combo.name)}
+                              className="p-3 text-left border"
+                              style={{
+                                background: active ? `${factionData.accent}1a` : "rgba(0,0,0,0.4)",
+                                borderColor: active ? factionData.accent : "#2a1f15",
+                              }}
+                          >
+                            <div className="display-font text-sm font-semibold tracking-wide flex items-center gap-2"
+                                 style={{ color: active ? factionData.accent : "#d4c5a0" }}>
+                              {active ? "▣" : "▢"} {combo.name}
                             </div>
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              {/* QTY +/- */}
-                              <div className="flex items-center border" style={{ borderColor: "#2a1f15" }}>
-                                <button onClick={() => editorChangeQty(unit.id, -1)}
-                                  disabled={qty <= 1}
-                                  className="mono-font text-sm px-2 py-1 leading-none"
-                                  style={{
-                                    color: qty <= 1 ? "#3a2818" : army.factionData.accent,
-                                    cursor: qty <= 1 ? "not-allowed" : "pointer",
-                                  }}>−</button>
-                                <span className="mono-font text-xs px-2 py-1" style={{ color: "#d4c5a0", minWidth: "20px", textAlign: "center" }}>
-                                  {qty}
-                                </span>
-                                <button onClick={() => editorChangeQty(unit.id, 1)}
-                                  disabled={qty >= unit.max}
-                                  className="mono-font text-sm px-2 py-1 leading-none"
-                                  style={{
-                                    color: qty >= unit.max ? "#3a2818" : army.factionData.accent,
-                                    cursor: qty >= unit.max ? "not-allowed" : "pointer",
-                                  }}>+</button>
-                              </div>
-                              {/* SWAP */}
-                              <button onClick={() => setSwapTarget(isSwapping ? null : { unitId: unit.id, role })}
-                                className="mono-font text-[10px] px-2 py-1 border tracking-wider"
-                                style={{
-                                  background: isSwapping ? army.factionData.accent : "transparent",
-                                  color: isSwapping ? "#0a0806" : "#8a7a5a",
-                                  borderColor: "#2a1f15",
-                                }}>
-                                ⇄ SWAP
-                              </button>
-                              {/* DUPLICATE */}
-                              <button onClick={() => editorDuplicateUnit(unit.id)}
-                                className="mono-font text-[10px] px-2 py-1 border tracking-wider"
-                                style={{ color: "#8a7a5a", borderColor: "#2a1f15" }}>
-                                ❏ DUP
-                              </button>
-                              {/* REMOVE */}
-                              <button onClick={() => editorRemoveUnit(unit.id)}
-                                className="mono-font text-[10px] px-2 py-1 border tracking-wider"
-                                style={{ color: "#a05050", borderColor: "#3a1818" }}>
-                                ✕
-                              </button>
-                              <div className="mono-font text-sm ml-2" style={{ color: "#d4c5a0", minWidth: "60px", textAlign: "right" }}>
-                                {unit.points * qty}<span className="text-stone-600 text-xs ml-1">pts</span>
-                              </div>
+                            <div className="text-[11px] text-stone-500 italic mt-1 leading-tight">
+                              {combo.description}
                             </div>
-                          </div>
-
-                          {/* SWAP DROPDOWN */}
-                          {isSwapping && (
-                            <div className="px-4 pb-3 border-t" style={{ borderColor: "#2a1f15" }}>
-                              <div className="mono-font text-[10px] text-stone-600 mb-2 mt-2 tracking-wider">
-                                SWAP TO ANOTHER {ROLE_LABELS[role].toUpperCase()}:
-                              </div>
-                              <div className="grid md:grid-cols-2 gap-1 max-h-48 overflow-y-auto">
-                                {(currentUnitPool[role] || [])
-                                  .filter((u) => u.name !== unit.name)
-                                  .map((u) => (
-                                    <button key={u.name} onClick={() => editorSwapUnit(unit.id, u.name)}
-                                      className="text-left p-2 border flex justify-between items-center text-xs"
-                                      style={{ background: "rgba(0,0,0,0.4)", borderColor: "#2a1f15", color: "#d4c5a0" }}>
-                                      <span className="display-font truncate">{u.name}</span>
-                                      <span className="mono-font" style={{ color: army.factionData.accent }}>
-                                        {u.points}<span className="text-stone-600 text-[9px] ml-0.5">pts</span>
-                                      </span>
-                                    </button>
-                                  ))}
-                              </div>
+                            <div className="mono-font text-[10px] text-stone-600 mt-2 leading-relaxed">
+                              ↳ {combo.units.join(" · ")}
                             </div>
-                          )}
-
-                          {/* SYNERGY HINTS */}
-                          {synergies.length > 0 && (
-                            <div className="px-4 pb-2 mono-font text-[10px] text-stone-600 italic leading-tight">
-                              ↳ synergizes with: {synergies.slice(0, 4).join(", ")}
-                            </div>
-                          )}
-                        </div>
+                          </button>
                       );
                     })}
                   </div>
+                  {selectedCombo && (
+                      <div className="mono-font text-[11px] mt-3 text-right tracking-wider" style={{ color: factionData.accent }}>
+                        ✦ COMBO LOCKED IN — UNITS WILL BE PINNED
+                      </div>
+                  )}
                 </div>
-              ) : null
             )}
 
-            {/* ADD MISSING ROLE */}
-            {Object.entries(ROLE_LABELS).map(([role, label]) => {
-              if (groupedUnits && groupedUnits[role]) return null;
-              const pool = currentUnitPool[role];
-              if (!pool || pool.length === 0) return null;
-              return (
-                <div key={role} className="mb-3 flex items-center justify-between gap-3 p-3 border border-dashed" style={{ borderColor: "#2a1f15" }}>
+            {/* PIN INDIVIDUAL UNITS */}
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+                <div className="display-font text-xs tracking-[0.3em]" style={{ color: factionData.accent }}>
+                  ⚒ PIN UNITS · MUST-INCLUDE LIST {pinnedUnits.length > 0 && `(${pinnedUnits.length})`}
+                </div>
+                <button onClick={() => setPinPanelOpen((o) => !o)}
+                        className="mono-font text-[10px] tracking-widest px-3 py-1 border"
+                        style={{
+                          background: pinPanelOpen ? factionData.accent : "transparent",
+                          color: pinPanelOpen ? "#0a0806" : "#8a7a5a",
+                          borderColor: factionData.accent,
+                        }}
+                >
+                  {pinPanelOpen ? "▲ COLLAPSE" : "▼ EXPAND"}
+                </button>
+              </div>
+
+              {pinnedUnits.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {pinnedUnits.map((name) => {
+                      const def = unitLookup[name];
+                      return (
+                          <button
+                              key={name}
+                              onClick={() => togglePinnedUnit(name)}
+                              className="mono-font text-[11px] tracking-wider px-3 py-1 border flex items-center gap-2"
+                              style={{ background: `${factionData.accent}22`, borderColor: factionData.accent, color: factionData.accent }}
+                          >
+                            ✦ {name} {def && <span className="text-stone-500">({def.points}pts)</span>} <span className="text-stone-500">✕</span>
+                          </button>
+                      );
+                    })}
+                  </div>
+              )}
+
+              {pinPanelOpen && (
+                  <div className="border p-4" style={{ borderColor: "#2a1f15", background: "rgba(0,0,0,0.3)" }}>
+                    {/* Role tabs */}
+                    <div className="flex flex-wrap gap-1 mb-3">
+                      {Object.entries(ROLE_LABELS).map(([key, label]) => {
+                        const active = pinSearchRole === key;
+                        const count = (currentUnitPool[key] || []).length;
+                        if (count === 0) return null;
+                        return (
+                            <button key={key} onClick={() => setPinSearchRole(key)}
+                                    className="mono-font text-[10px] tracking-widest px-3 py-1 border"
+                                    style={{
+                                      background: active ? factionData.accent : "transparent",
+                                      color: active ? "#0a0806" : "#8a7a5a",
+                                      borderColor: active ? factionData.accent : "#2a1f15",
+                                    }}
+                            >
+                              {label.toUpperCase()} · {count}
+                            </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Unit list for selected role */}
+                    <div className="grid md:grid-cols-2 gap-1.5 max-h-96 overflow-y-auto">
+                      {(currentUnitPool[pinSearchRole] || []).map((u) => {
+                        const isPinned = pinnedUnits.includes(u.name);
+                        const synergies = getSynergyHints(u.name);
+                        return (
+                            <button
+                                key={u.name}
+                                onClick={() => togglePinnedUnit(u.name)}
+                                className="p-2 text-left border"
+                                style={{
+                                  background: isPinned ? `${factionData.accent}22` : "rgba(0,0,0,0.4)",
+                                  borderColor: isPinned ? factionData.accent : "#2a1f15",
+                                }}
+                            >
+                              <div className="flex items-center justify-between gap-2">
+                          <span className="display-font text-[13px]"
+                                style={{ color: isPinned ? factionData.accent : "#d4c5a0" }}>
+                            {isPinned ? "▣" : "▢"} {u.name}
+                          </span>
+                                <span className="mono-font text-[11px]" style={{ color: factionData.accent }}>
+                            {u.points}<span className="text-stone-600 text-[9px] ml-0.5">pts</span>
+                          </span>
+                              </div>
+                              {synergies.length > 0 && (
+                                  <div className="mono-font text-[9px] text-stone-500 mt-1 italic leading-tight">
+                                    ↳ pairs well with: {synergies.slice(0, 3).join(", ")}
+                                  </div>
+                              )}
+                            </button>
+                        );
+                      })}
+                    </div>
+                    <div className="text-[10px] text-stone-600 italic mt-2">
+                      Tip: pinning a leader will hint at units that synergize with them. The generator will fill the rest of the army around your pinned units.
+                    </div>
+                  </div>
+              )}
+            </div>
+
+            {/* ENHANCEMENTS */}
+            {detachmentData && detachmentData.enhancements.length > 0 && (
+                <div className="mb-8">
+                  <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+                    <div className="display-font text-xs tracking-[0.3em]" style={{ color: factionData.accent }}>
+                      ⸺ ENHANCEMENTS · {detachment}
+                    </div>
+                    <button onClick={() => setEnhancementsEnabled((e) => !e)}
+                            className="mono-font text-[10px] tracking-widest px-3 py-1 border"
+                            style={{
+                              background: enhancementsEnabled ? factionData.accent : "transparent",
+                              color: enhancementsEnabled ? "#0a0806" : "#8a7a5a",
+                              borderColor: factionData.accent,
+                            }}
+                    >
+                      {enhancementsEnabled ? "▣ ENABLED" : "▢ DISABLED"}
+                    </button>
+                  </div>
+                  <div className={`grid md:grid-cols-2 gap-2 transition-opacity ${
+                      enhancementsEnabled ? "opacity-100" : "opacity-40 pointer-events-none"
+                  }`}>
+                    {detachmentData.enhancements.map((enh) => {
+                      const active = selectedEnhancements.includes(enh.name);
+                      return (
+                          <button key={enh.name} onClick={() => toggleEnhancement(enh.name)}
+                                  className="p-3 text-left border flex items-start justify-between gap-2"
+                                  style={{
+                                    background: active ? `${factionData.accent}1a` : "rgba(0,0,0,0.4)",
+                                    borderColor: active ? factionData.accent : "#2a1f15",
+                                  }}
+                          >
+                            <div className="flex-1 min-w-0">
+                              <div className="display-font text-sm font-semibold tracking-wide"
+                                   style={{ color: active ? factionData.accent : "#d4c5a0" }}>
+                                {active ? "▣" : "▢"} {enh.name}
+                              </div>
+                              <div className="mono-font text-[10px] text-stone-600 mt-1 tracking-wider uppercase">
+                                {enh.type}
+                              </div>
+                            </div>
+                            <div className="mono-font text-sm font-bold" style={{ color: factionData.accent }}>
+                              +{enh.points}<span className="text-stone-600 text-[10px] ml-0.5">pts</span>
+                            </div>
+                          </button>
+                      );
+                    })}
+                  </div>
+                  {enhancementsEnabled && enhancementTotalCost > 0 && (
+                      <div className="mono-font text-xs mt-3 text-right tracking-wider" style={{ color: factionData.accent }}>
+                        ENHANCEMENT BUDGET: {enhancementTotalCost} PTS
+                      </div>
+                  )}
+                </div>
+            )}
+
+            {/* GENERATE BUTTON */}
+            <div className="flex justify-center">
+              <button onClick={handleGenerate} disabled={generating}
+                      className="glow-button display-font px-12 py-4 text-sm tracking-[0.3em] font-bold border-2 transition-all"
+                      style={{
+                        background: `linear-gradient(180deg, ${factionData.color} 0%, #000 100%)`,
+                        color: factionData.accent,
+                        borderColor: factionData.accent,
+                        cursor: generating ? "wait" : "pointer",
+                      }}
+              >
+                {generating ? "✦ INVOKING THE MACHINE SPIRIT ✦" : "⚔ FORGE ARMY ⚔"}
+              </button>
+            </div>
+          </div>
+
+          {/* RESULTS */}
+          {army && (
+              <div id="results" className="border p-6 md:p-10"
+                   style={{
+                     background: `linear-gradient(180deg, ${army.factionData.color}22 0%, rgba(10,8,6,0.95) 50%)`,
+                     borderColor: army.factionData.accent,
+                     boxShadow: `0 0 40px ${army.factionData.accent}22`,
+                   }}
+              >
+                <div className="text-center mb-8 pb-6 border-b" style={{ borderColor: "#3a2818" }}>
+                  <div className="mono-font text-[10px] tracking-[0.4em] text-stone-600 mb-2">
+                    ◆ ORDO TACTICUS · DOSSIER #{Math.floor(Math.random() * 9000 + 1000)} ◆
+                  </div>
+                  <div className="display-font text-5xl mb-2" style={{ color: army.factionData.accent }}>
+                    {army.factionData.icon}
+                  </div>
+                  <h2 className="display-font text-3xl md:text-4xl font-bold mb-1" style={{ color: army.factionData.accent }}>
+                    {army.faction.toUpperCase()}
+                  </h2>
+                  <div className="display-font text-sm tracking-widest text-stone-400 mb-1">
+                    {army.subFaction.toUpperCase()}
+                  </div>
+                  <div className="display-font text-sm italic text-stone-500 mb-1">
+                    "{army.factionData.motto}"
+                  </div>
+                  <div className="mono-font text-xs tracking-widest mt-3" style={{ color: army.factionData.accent }}>
+                    ⟨ {army.detachment.toUpperCase()} ⟩
+                  </div>
+                  {army.comboName && (
+                      <div className="mono-font text-[11px] tracking-widest mt-1 text-stone-500">
+                        ⚜ COMBO: {army.comboName.toUpperCase()}
+                      </div>
+                  )}
+                  <div className="flex justify-center gap-6 md:gap-8 mt-4 flex-wrap">
+                    <Stat label="Total" value={`${army.spent + army.enhancementSpend} / ${points}`} accent={army.factionData.accent} />
+                    <Stat label="Units" value={army.units.length} accent={army.factionData.accent} />
+                    <Stat label="Doctrine" value={ARMY_TYPES[armyType].label} accent={army.factionData.accent} />
+                    {army.enhancementSpend > 0 && (
+                        <Stat label="Enhancements" value={`+${army.enhancementSpend}pts`} accent={army.factionData.accent} />
+                    )}
+                  </div>
+                </div>
+
+                {/* SELECTED ENHANCEMENTS */}
+                {army.selectedEnhancements && army.selectedEnhancements.length > 0 && (
+                    <div className="mb-8">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="h-px flex-grow" style={{ background: `${army.factionData.accent}44` }} />
+                        <div className="display-font text-xs tracking-[0.3em] font-bold" style={{ color: army.factionData.accent }}>
+                          SELECTED ENHANCEMENTS · {army.selectedEnhancements.length}
+                        </div>
+                        <div className="h-px flex-grow" style={{ background: `${army.factionData.accent}44` }} />
+                      </div>
+                      <div className="grid md:grid-cols-2 gap-2">
+                        {army.selectedEnhancements.map((enhName, idx) => {
+                          const enh = army.factionData.detachments[army.detachment].enhancements.find((e) => e.name === enhName);
+                          return (
+                              <div key={enhName} className="unit-card flex justify-between items-center px-4 py-3 border"
+                                   style={{
+                                     background: `${army.factionData.accent}11`,
+                                     borderColor: army.factionData.accent,
+                                     animationDelay: `${idx * 0.06}s`,
+                                   }}
+                              >
+                                <div>
+                                  <div className="display-font text-sm font-semibold" style={{ color: army.factionData.accent }}>
+                                    ✦ {enhName}
+                                  </div>
+                                  <div className="mono-font text-[10px] text-stone-600 mt-0.5 tracking-wider uppercase">
+                                    {enh?.type}
+                                  </div>
+                                </div>
+                                <div className="mono-font text-sm" style={{ color: "#d4c5a0" }}>
+                                  {enh?.points}<span className="text-stone-600 text-xs ml-1">pts</span>
+                                </div>
+                              </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                )}
+
+                {/* EDITOR HEADER */}
+                <div className="mb-4 flex items-center justify-between flex-wrap gap-3">
+                  <div className="display-font text-xs tracking-[0.3em]" style={{ color: army.factionData.accent }}>
+                    ⚒ ARMY ROSTER · CLICK ANY UNIT TO EDIT
+                  </div>
+                  <div className="mono-font text-[11px] tracking-wider text-stone-500">
+                    ◆ ◆ ◆
+                  </div>
+                </div>
+
+                {/* UNITS BY ROLE — EDITABLE */}
+                {Object.entries(ROLE_LABELS).map(([role, label]) =>
+                    groupedUnits && groupedUnits[role] ? (
+                        <div key={role} className="mb-7">
+                          <div className="flex items-center gap-3 mb-3">
+                            <div className="h-px flex-grow" style={{ background: `${army.factionData.accent}44` }} />
+                            <div className="display-font text-xs tracking-[0.3em] font-bold" style={{ color: army.factionData.accent }}>
+                              {label.toUpperCase()} · {groupedUnits[role].length}
+                            </div>
+                            <div className="h-px flex-grow" style={{ background: `${army.factionData.accent}44` }} />
+                            <button
+                                onClick={() => {
+                                  // Add a random unit from this role
+                                  const pool = currentUnitPool[role];
+                                  if (!pool || pool.length === 0) return;
+                                  // Find one not at max
+                                  const available = pool.filter((u) => {
+                                    const count = army.units.filter((existing) => existing.name === u.name).length;
+                                    return count < u.max;
+                                  });
+                                  if (available.length === 0) return;
+                                  const pick = available[Math.floor(Math.random() * available.length)];
+                                  editorAddUnit(pick.name);
+                                }}
+                                className="mono-font text-[10px] tracking-widest px-2 py-1 border"
+                                style={{
+                                  borderColor: army.factionData.accent,
+                                  color: army.factionData.accent,
+                                  background: "transparent",
+                                }}
+                            >
+                              + ADD
+                            </button>
+                          </div>
+                          <div className="space-y-2">
+                            {groupedUnits[role].map((unit, idx) => {
+                              const isSwapping = swapTarget && swapTarget.unitId === unit.id;
+                              const qty = unit.qty || 1;
+                              const synergies = getSynergyHints(unit.name);
+                              return (
+                                  <div key={unit.id} className="unit-card border"
+                                       style={{
+                                         background: unit.pinned ? `${army.factionData.accent}11` : "rgba(0,0,0,0.4)",
+                                         borderColor: unit.pinned ? army.factionData.accent : "#2a1f15",
+                                         animationDelay: `${idx * 0.04}s`,
+                                       }}
+                                  >
+                                    <div className="flex justify-between items-center px-4 py-3 gap-3 flex-wrap">
+                                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                              <span className="mono-font text-[10px] tracking-wider flex-shrink-0" style={{ color: army.factionData.accent }}>
+                                {String(idx + 1).padStart(2, "0")}
+                              </span>
+                                        {unit.pinned && (
+                                            <span className="mono-font text-[9px] px-1.5 py-0.5 border tracking-wider"
+                                                  style={{ color: army.factionData.accent, borderColor: army.factionData.accent }}>
+                                  PINNED
+                                </span>
+                                        )}
+                                        <span className="display-font text-base text-stone-200 truncate">
+                                {unit.name}
+                                          {qty > 1 && <span className="text-stone-500 ml-2">×{qty}</span>}
+                              </span>
+                                      </div>
+                                      <div className="flex items-center gap-1.5 flex-wrap">
+                                        {/* QTY +/- */}
+                                        <div className="flex items-center border" style={{ borderColor: "#2a1f15" }}>
+                                          <button onClick={() => editorChangeQty(unit.id, -1)}
+                                                  disabled={qty <= 1}
+                                                  className="mono-font text-sm px-2 py-1 leading-none"
+                                                  style={{
+                                                    color: qty <= 1 ? "#3a2818" : army.factionData.accent,
+                                                    cursor: qty <= 1 ? "not-allowed" : "pointer",
+                                                  }}>−</button>
+                                          <span className="mono-font text-xs px-2 py-1" style={{ color: "#d4c5a0", minWidth: "20px", textAlign: "center" }}>
+                                  {qty}
+                                </span>
+                                          <button onClick={() => editorChangeQty(unit.id, 1)}
+                                                  disabled={qty >= unit.max}
+                                                  className="mono-font text-sm px-2 py-1 leading-none"
+                                                  style={{
+                                                    color: qty >= unit.max ? "#3a2818" : army.factionData.accent,
+                                                    cursor: qty >= unit.max ? "not-allowed" : "pointer",
+                                                  }}>+</button>
+                                        </div>
+                                        {/* SWAP */}
+                                        <button onClick={() => setSwapTarget(isSwapping ? null : { unitId: unit.id, role })}
+                                                className="mono-font text-[10px] px-2 py-1 border tracking-wider"
+                                                style={{
+                                                  background: isSwapping ? army.factionData.accent : "transparent",
+                                                  color: isSwapping ? "#0a0806" : "#8a7a5a",
+                                                  borderColor: "#2a1f15",
+                                                }}>
+                                          ⇄ SWAP
+                                        </button>
+                                        {/* DUPLICATE */}
+                                        <button onClick={() => editorDuplicateUnit(unit.id)}
+                                                className="mono-font text-[10px] px-2 py-1 border tracking-wider"
+                                                style={{ color: "#8a7a5a", borderColor: "#2a1f15" }}>
+                                          ❏ DUP
+                                        </button>
+                                        {/* REMOVE */}
+                                        <button onClick={() => editorRemoveUnit(unit.id)}
+                                                className="mono-font text-[10px] px-2 py-1 border tracking-wider"
+                                                style={{ color: "#a05050", borderColor: "#3a1818" }}>
+                                          ✕
+                                        </button>
+                                        <div className="mono-font text-sm ml-2" style={{ color: "#d4c5a0", minWidth: "60px", textAlign: "right" }}>
+                                          {unit.points * qty}<span className="text-stone-600 text-xs ml-1">pts</span>
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    {/* SWAP DROPDOWN */}
+                                    {isSwapping && (
+                                        <div className="px-4 pb-3 border-t" style={{ borderColor: "#2a1f15" }}>
+                                          <div className="mono-font text-[10px] text-stone-600 mb-2 mt-2 tracking-wider">
+                                            SWAP TO ANOTHER {ROLE_LABELS[role].toUpperCase()}:
+                                          </div>
+                                          <div className="grid md:grid-cols-2 gap-1 max-h-48 overflow-y-auto">
+                                            {(currentUnitPool[role] || [])
+                                                .filter((u) => u.name !== unit.name)
+                                                .map((u) => (
+                                                    <button key={u.name} onClick={() => editorSwapUnit(unit.id, u.name)}
+                                                            className="text-left p-2 border flex justify-between items-center text-xs"
+                                                            style={{ background: "rgba(0,0,0,0.4)", borderColor: "#2a1f15", color: "#d4c5a0" }}>
+                                                      <span className="display-font truncate">{u.name}</span>
+                                                      <span className="mono-font" style={{ color: army.factionData.accent }}>
+                                        {u.points}<span className="text-stone-600 text-[9px] ml-0.5">pts</span>
+                                      </span>
+                                                    </button>
+                                                ))}
+                                          </div>
+                                        </div>
+                                    )}
+
+                                    {/* SYNERGY HINTS */}
+                                    {synergies.length > 0 && (
+                                        <div className="px-4 pb-2 mono-font text-[10px] text-stone-600 italic leading-tight">
+                                          ↳ synergizes with: {synergies.slice(0, 4).join(", ")}
+                                        </div>
+                                    )}
+                                  </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                    ) : null
+                )}
+
+                {/* ADD MISSING ROLE */}
+                {Object.entries(ROLE_LABELS).map(([role, label]) => {
+                  if (groupedUnits && groupedUnits[role]) return null;
+                  const pool = currentUnitPool[role];
+                  if (!pool || pool.length === 0) return null;
+                  return (
+                      <div key={role} className="mb-3 flex items-center justify-between gap-3 p-3 border border-dashed" style={{ borderColor: "#2a1f15" }}>
                   <span className="mono-font text-xs tracking-widest text-stone-600">
                     NO {label.toUpperCase()} IN ARMY
                   </span>
-                  <button onClick={() => {
-                    const pick = pool[Math.floor(Math.random() * pool.length)];
-                    editorAddUnit(pick.name);
-                  }}
-                    className="mono-font text-[10px] tracking-widest px-3 py-1 border"
-                    style={{ color: army.factionData.accent, borderColor: army.factionData.accent }}>
-                    + ADD {label.toUpperCase()}
-                  </button>
+                        <button onClick={() => {
+                          const pick = pool[Math.floor(Math.random() * pool.length)];
+                          editorAddUnit(pick.name);
+                        }}
+                                className="mono-font text-[10px] tracking-widest px-3 py-1 border"
+                                style={{ color: army.factionData.accent, borderColor: army.factionData.accent }}>
+                          + ADD {label.toUpperCase()}
+                        </button>
+                      </div>
+                  );
+                })}
+
+                <div className="mt-8 pt-6 border-t text-center" style={{ borderColor: "#3a2818" }}>
+                  <div className="mono-font text-[10px] tracking-[0.3em] text-stone-600">
+                    ✠ SEALED BY THE ADEPTUS ADMINISTRATUM ✠
+                  </div>
                 </div>
-              );
-            })}
-
-            <div className="mt-8 pt-6 border-t text-center" style={{ borderColor: "#3a2818" }}>
-              <div className="mono-font text-[10px] tracking-[0.3em] text-stone-600">
-                ✠ SEALED BY THE ADEPTUS ADMINISTRATUM ✠
               </div>
-            </div>
-          </div>
-        )}
+          )}
 
-        {!army && (
-          <div className="text-center py-16">
-            <div className="display-font text-xl tracking-[0.3em] text-stone-700 italic"
-              style={{ animation: "flicker 3s infinite" }}>
-              ⸻ AWAITING ORDERS, COMMANDER ⸻
-            </div>
-          </div>
-        )}
+          {!army && (
+              <div className="text-center py-16">
+                <div className="display-font text-xl tracking-[0.3em] text-stone-700 italic"
+                     style={{ animation: "flicker 3s infinite" }}>
+                  ⸻ AWAITING ORDERS, COMMANDER ⸻
+                </div>
+              </div>
+          )}
 
-        <div className="mt-10 text-center mono-font text-[10px] tracking-widest text-stone-700">
-          POINT VALUES ARE APPROXIMATIONS FOR LIST INSPIRATION · NOT TOURNAMENT-LEGAL
+          <div className="mt-10 text-center mono-font text-[10px] tracking-widest text-stone-700">
+            POINT VALUES ARE APPROXIMATIONS FOR LIST INSPIRATION · NOT TOURNAMENT-LEGAL
+          </div>
         </div>
       </div>
-    </div>
   );
 }
 
@@ -5476,13 +5672,14 @@ export default function App() {
 
 function Stat({ label, value, accent }) {
   return (
-    <div className="text-center">
-      <div className="mono-font text-[10px] tracking-[0.2em] text-stone-600 mb-1">
-        {label.toUpperCase()}
+      <div className="text-center">
+        <div className="mono-font text-[10px] tracking-[0.2em] text-stone-600 mb-1">
+          {label.toUpperCase()}
+        </div>
+        <div className="display-font text-base md:text-lg font-semibold" style={{ color: accent }}>
+          {value}
+        </div>
       </div>
-      <div className="display-font text-base md:text-lg font-semibold" style={{ color: accent }}>
-        {value}
-      </div>
-    </div>
   );
 }
+
