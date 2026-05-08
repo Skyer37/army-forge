@@ -4296,7 +4296,15 @@ function makeRng(seed) {
 // Compute simplified offensive/defensive stats from a unit's data
 function computeUnitStats(unit) {
   const role = unit.role;
-  const pts = unit.points * (unit.qty || 1);
+  // Determine base squad size from the unit's name, e.g. "Boyz (10)" -> 10
+  const nameMatch = unit.name.match(/\((\d+)\)/);
+  const baseSize = nameMatch ? parseInt(nameMatch[1]) : 1;
+  // Use override squadSize if set (lets the user simulate a smaller squad)
+  const effectiveSquadSize = unit.squadSize || baseSize;
+  // Per-squad points scale linearly with squad size
+  const perSquadPoints = baseSize > 0 ? Math.round(unit.points * (effectiveSquadSize / baseSize)) : unit.points;
+  // Total points contributed by this army entry (qty = number of duplicate squads)
+  const pts = perSquadPoints * (unit.qty || 1);
 
   // Heuristic: model count and durability scale with points + role
   let modelCount = 1;
@@ -4307,9 +4315,8 @@ function computeUnitStats(unit) {
   let move = 6;
   let armor = 4;
 
-  // Try to extract model count from name like "(10)" or "(5)"
-  const m = unit.name.match(/\((\d+)\)/);
-  if (m) modelCount = parseInt(m[1]);
+  // Use the effective squad size (post-resize) as the model count
+  modelCount = effectiveSquadSize;
 
   if (role === "hq") {
     modelCount = 1; woundsPerModel = Math.max(4, Math.floor(pts / 30));
@@ -4734,6 +4741,30 @@ export default function App() {
     return out;
   };
 
+  // Squad-size system: parse "(N)" from a unit name to get the base squad size.
+  // E.g. "Ironstrider Ballistarii (3)" → 3, "Captain" → 1
+  const getBaseSquadSize = (unitName) => {
+    const m = unitName && unitName.match(/\((\d+)\)/);
+    return m ? parseInt(m[1]) : 1;
+  };
+
+  // Returns the effective display name and points for an army unit, accounting for
+  // squadSize (per-squad model count) and qty (number of duplicate squads).
+  // - unit.points is the cost for a single squad at the BASE size shown in the name.
+  // - unit.squadSize, if set, replaces that base size; points scale linearly per model.
+  // - unit.qty multiplies the whole thing (number of duplicate squads).
+  const getEffectiveUnit = (unit) => {
+    const baseSize = getBaseSquadSize(unit.name);
+    const squadSize = unit.squadSize || baseSize;
+    const qty = unit.qty || 1;
+    const perSquadPoints = baseSize > 0 ? Math.round(unit.points * (squadSize / baseSize)) : unit.points;
+    const effectivePoints = perSquadPoints * qty;
+    const displayName = baseSize > 1 && squadSize !== baseSize
+        ? unit.name.replace(/\(\d+\)/, `(${squadSize})`)
+        : unit.name;
+    return { baseSize, squadSize, qty, perSquadPoints, effectivePoints, displayName, isResizable: baseSize > 1 };
+  };
+
   // Load saved armies from window.storage on mount
   useEffect(() => {
     let cancelled = false;
@@ -4925,7 +4956,7 @@ export default function App() {
   // ARMY EDITOR FUNCTIONS
   // ==========================================
   const recalcSpent = (units) =>
-      units.reduce((s, u) => s + (u.points * (u.qty || 1)), 0);
+      units.reduce((s, u) => s + getEffectiveUnit(u).effectivePoints, 0);
 
   const editorRemoveUnit = (unitId) => {
     if (!army) return;
@@ -4953,6 +4984,26 @@ export default function App() {
       const currentQty = u.qty || 1;
       const newQty = Math.max(1, Math.min(u.max, currentQty + delta));
       return { ...u, qty: newQty };
+    });
+    setArmy({ ...army, units: newUnits, spent: recalcSpent(newUnits) });
+  };
+
+  // Resize a single squad — change the number of models in the squad itself
+  // (separate from qty, which is the number of duplicate squads).
+  // Points scale linearly per model. Minimum 1 model, maximum the unit's base size.
+  const editorChangeSquadSize = (unitId, delta) => {
+    if (!army) return;
+    const newUnits = army.units.map((u) => {
+      if (u.id !== unitId) return u;
+      const baseSize = getBaseSquadSize(u.name);
+      if (baseSize <= 1) return u; // not resizable
+      const currentSize = u.squadSize || baseSize;
+      const newSize = Math.max(1, Math.min(baseSize, currentSize + delta));
+      // Clear squadSize back to undefined when at base, to keep saves clean
+      const next = { ...u };
+      if (newSize === baseSize) delete next.squadSize;
+      else next.squadSize = newSize;
+      return next;
     });
     setArmy({ ...army, units: newUnits, spent: recalcSpent(newUnits) });
   };
@@ -5015,6 +5066,7 @@ export default function App() {
           role: u.role,
           pinned: !!u.pinned,
           qty: u.qty || 1,
+          ...(u.squadSize ? { squadSize: u.squadSize } : {}),
         })),
         spent: army.spent,
         enhancementSpend: army.enhancementSpend,
@@ -5066,9 +5118,11 @@ export default function App() {
         ...u,
         id: Math.random(),
       }));
+      // Recompute spent in case saved value is stale (e.g., older save without squadSize)
+      const recomputedSpent = restoredUnits.reduce((sum, u) => sum + getEffectiveUnit(u).effectivePoints, 0);
       setArmy({
         units: restoredUnits,
-        spent: s.spent || 0,
+        spent: recomputedSpent,
         enhancementSpend: s.enhancementSpend || 0,
         faction: s.faction,
         subFaction: s.subFaction,
@@ -5156,9 +5210,10 @@ export default function App() {
       if (!groups[role]) continue;
       lines.push(`${label.toUpperCase()}`);
       for (const u of groups[role]) {
-        const qtyStr = (u.qty || 1) > 1 ? ` ×${u.qty}` : "";
+        const eff = getEffectiveUnit(u);
+        const qtyStr = eff.qty > 1 ? ` ×${eff.qty}` : "";
         const pinStr = u.pinned ? " [PINNED]" : "";
-        lines.push(`  • ${u.name}${qtyStr} — ${u.points * (u.qty || 1)}pts${pinStr}`);
+        lines.push(`  • ${eff.displayName}${qtyStr} — ${eff.effectivePoints}pts${pinStr}`);
       }
       lines.push(``);
     }
@@ -6019,7 +6074,8 @@ export default function App() {
                           <div className="space-y-2">
                             {groupedUnits[role].map((unit, idx) => {
                               const isSwapping = swapTarget && swapTarget.unitId === unit.id;
-                              const qty = unit.qty || 1;
+                              const eff = getEffectiveUnit(unit);
+                              const qty = eff.qty;
                               const synergies = getSynergyHints(unit.name);
                               return (
                                   <div key={unit.id} className="unit-card border"
@@ -6041,13 +6097,40 @@ export default function App() {
                                 </span>
                                         )}
                                         <span className="display-font text-base text-stone-200 truncate">
-                                {unit.name}
+                                {eff.displayName}
                                           {qty > 1 && <span className="text-stone-500 ml-2">×{qty}</span>}
+                                          {eff.isResizable && eff.squadSize !== eff.baseSize && (
+                                              <span className="mono-font text-[9px] ml-2" style={{ color: army.factionData.accent }}>
+                                    (resized from {eff.baseSize})
+                                  </span>
+                                          )}
                               </span>
                                       </div>
                                       <div className="flex items-center gap-1.5 flex-wrap">
+                                        {/* SQUAD SIZE +/- (only for multi-model units) */}
+                                        {eff.isResizable && (
+                                            <div className="flex items-center border" style={{ borderColor: "#2a1f15" }} title="Models in this squad">
+                                              <button onClick={() => editorChangeSquadSize(unit.id, -1)}
+                                                      disabled={eff.squadSize <= 1}
+                                                      className="mono-font text-sm px-2 py-1 leading-none"
+                                                      style={{
+                                                        color: eff.squadSize <= 1 ? "#3a2818" : "#8aa8c8",
+                                                        cursor: eff.squadSize <= 1 ? "not-allowed" : "pointer",
+                                                      }}>−</button>
+                                              <span className="mono-font text-[10px] px-2 py-1" style={{ color: "#8aa8c8", minWidth: "16px", textAlign: "center" }} title="Squad size">
+                                    👥{eff.squadSize}
+                                  </span>
+                                              <button onClick={() => editorChangeSquadSize(unit.id, 1)}
+                                                      disabled={eff.squadSize >= eff.baseSize}
+                                                      className="mono-font text-sm px-2 py-1 leading-none"
+                                                      style={{
+                                                        color: eff.squadSize >= eff.baseSize ? "#3a2818" : "#8aa8c8",
+                                                        cursor: eff.squadSize >= eff.baseSize ? "not-allowed" : "pointer",
+                                                      }}>+</button>
+                                            </div>
+                                        )}
                                         {/* QTY +/- */}
-                                        <div className="flex items-center border" style={{ borderColor: "#2a1f15" }}>
+                                        <div className="flex items-center border" style={{ borderColor: "#2a1f15" }} title="Number of duplicate squads">
                                           <button onClick={() => editorChangeQty(unit.id, -1)}
                                                   disabled={qty <= 1}
                                                   className="mono-font text-sm px-2 py-1 leading-none"
@@ -6056,7 +6139,7 @@ export default function App() {
                                                     cursor: qty <= 1 ? "not-allowed" : "pointer",
                                                   }}>−</button>
                                           <span className="mono-font text-xs px-2 py-1" style={{ color: "#d4c5a0", minWidth: "20px", textAlign: "center" }}>
-                                  {qty}
+                                  ×{qty}
                                 </span>
                                           <button onClick={() => editorChangeQty(unit.id, 1)}
                                                   disabled={qty >= unit.max}
@@ -6089,7 +6172,7 @@ export default function App() {
                                           ✕
                                         </button>
                                         <div className="mono-font text-sm ml-2" style={{ color: "#d4c5a0", minWidth: "60px", textAlign: "right" }}>
-                                          {unit.points * qty}<span className="text-stone-600 text-xs ml-1">pts</span>
+                                          {eff.effectivePoints}<span className="text-stone-600 text-xs ml-1">pts</span>
                                         </div>
                                       </div>
                                     </div>
@@ -7033,3 +7116,4 @@ function OverridesPanel({
   );
 }
 
+    
