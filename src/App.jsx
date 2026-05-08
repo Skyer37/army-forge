@@ -4239,6 +4239,415 @@ function generateArmy({
 
 
 // ============================================================
+// BATTLE SIMULATOR ENGINE
+// ============================================================
+
+const FORMATS = {
+  "Combat Patrol": { points: 500, width: 30, height: 22, turns: 5, description: "Quick skirmish on a small board" },
+  Incursion: { points: 1000, width: 44, height: 30, turns: 5, description: "Mid-size engagement" },
+  "Strike Force": { points: 2000, width: 60, height: 44, turns: 5, description: "Standard tournament size" },
+  Onslaught: { points: 3000, width: 72, height: 50, turns: 5, description: "Massive armored conflict" },
+};
+
+const TERRAIN_TYPES = [
+  { name: "Ruins", color: "#3a2a1a", border: "#5a4030", coverBonus: 1, blocksLOS: true },
+  { name: "Crater", color: "#2a1f15", border: "#4a3525", coverBonus: 1, blocksLOS: false },
+  { name: "Hill", color: "#3d3220", border: "#5a4830", coverBonus: 0, blocksLOS: false },
+  { name: "Forest", color: "#1f3520", border: "#2a4a30", coverBonus: 1, blocksLOS: true },
+  { name: "Wreckage", color: "#3a2818", border: "#5a3a25", coverBonus: 1, blocksLOS: true },
+];
+
+const SECONDARIES = [
+  "Engage on All Fronts",
+  "Bring It Down",
+  "Assassinate",
+  "Behind Enemy Lines",
+  "No Prisoners",
+  "Cleanse",
+  "Containment",
+  "Extend Battle Lines",
+  "Storm Hostile Objective",
+  "Marked for Death",
+];
+
+// Simple seeded RNG so battles are reproducible from a seed
+function makeRng(seed) {
+  let s = seed | 0;
+  return function () {
+    s = (s * 9301 + 49297) % 233280;
+    return s / 233280;
+  };
+}
+
+// Compute simplified offensive/defensive stats from a unit's data
+function computeUnitStats(unit) {
+  const role = unit.role;
+  const pts = unit.points * (unit.qty || 1);
+
+  // Heuristic: model count and durability scale with points + role
+  let modelCount = 1;
+  let woundsPerModel = 2;
+  let attacks = 4;
+  let shooting = 4;
+  let melee = 4;
+  let move = 6;
+  let armor = 4;
+
+  // Try to extract model count from name like "(10)" or "(5)"
+  const m = unit.name.match(/\((\d+)\)/);
+  if (m) modelCount = parseInt(m[1]);
+
+  if (role === "hq") {
+    modelCount = 1; woundsPerModel = Math.max(4, Math.floor(pts / 30));
+    attacks = 6; shooting = 5; melee = 7; move = 6; armor = 3;
+  } else if (role === "troops") {
+    woundsPerModel = 2;
+    attacks = modelCount * 2;
+    shooting = Math.floor(pts / 12);
+    melee = Math.floor(pts / 14);
+    move = 6; armor = 4;
+  } else if (role === "elites") {
+    woundsPerModel = 3;
+    attacks = modelCount * 3;
+    shooting = Math.floor(pts / 10);
+    melee = Math.floor(pts / 8);
+    move = 6; armor = 3;
+  } else if (role === "fast") {
+    woundsPerModel = 3;
+    attacks = modelCount * 2;
+    shooting = Math.floor(pts / 12);
+    melee = Math.floor(pts / 12);
+    move = 12; armor = 4;
+  } else if (role === "heavy") {
+    modelCount = Math.max(1, modelCount);
+    woundsPerModel = Math.max(8, Math.floor(pts / 20));
+    attacks = 4;
+    shooting = Math.floor(pts / 6);
+    melee = Math.floor(pts / 16);
+    move = 5; armor = 3;
+  } else if (role === "transport") {
+    modelCount = 1;
+    woundsPerModel = Math.max(8, Math.floor(pts / 12));
+    attacks = 2; shooting = Math.floor(pts / 12); melee = 2;
+    move = 10; armor = 3;
+  }
+
+  return {
+    modelCount,
+    maxModels: modelCount,
+    woundsPerModel,
+    currentWounds: modelCount * woundsPerModel,
+    maxWounds: modelCount * woundsPerModel,
+    attacks: Math.max(2, attacks),
+    shooting: Math.max(2, shooting),
+    melee: Math.max(2, melee),
+    move,
+    armor,
+    range: role === "heavy" || role === "troops" || role === "hq" ? 24 : (role === "fast" ? 18 : 12),
+  };
+}
+
+// Generate random terrain inside the playing area
+function generateTerrain(rng, width, height) {
+  const pieces = [];
+  const desiredPieces = Math.floor(width * height / 110);
+  for (let i = 0; i < desiredPieces; i++) {
+    const t = TERRAIN_TYPES[Math.floor(rng() * TERRAIN_TYPES.length)];
+    const w = 4 + Math.floor(rng() * 6);
+    const h = 4 + Math.floor(rng() * 5);
+    const x = 6 + rng() * (width - 12 - w);
+    const y = 6 + rng() * (height - 12 - h);
+    pieces.push({ ...t, x, y, w, h, id: `t${i}` });
+  }
+  return pieces;
+}
+
+// Place objectives in a roughly symmetric pattern
+function generateObjectives(rng, width, height) {
+  const objs = [];
+  // Always at least: 2 in center, 1 in each corner-ish zone
+  objs.push({ id: "o1", x: width / 2, y: height / 2 });
+  objs.push({ id: "o2", x: width / 2, y: height / 4 });
+  objs.push({ id: "o3", x: width / 2, y: (3 * height) / 4 });
+  objs.push({ id: "o4", x: width / 4, y: height / 2 });
+  objs.push({ id: "o5", x: (3 * width) / 4, y: height / 2 });
+  // jitter slightly
+  for (const o of objs) {
+    o.x += (rng() - 0.5) * 4;
+    o.y += (rng() - 0.5) * 4;
+  }
+  return objs;
+}
+
+// Place an army's units in their deployment zone (left side or right)
+function deployArmy(army, side, width, height, rng) {
+  const isLeft = side === "left";
+  const xStart = isLeft ? 2 : width - 8;
+  const xEnd = isLeft ? 8 : width - 2;
+  const placed = [];
+  // Spread units in a column, role-prioritized: heavies in back, troops in middle, fast in front
+  const order = { heavy: 0, transport: 1, hq: 2, elites: 3, troops: 4, fast: 5 };
+  const sorted = [...army.units].sort((a, b) => (order[a.role] ?? 6) - (order[b.role] ?? 6));
+  const lanes = Math.max(3, Math.ceil(Math.sqrt(sorted.length)));
+  let i = 0;
+  for (const u of sorted) {
+    const stats = computeUnitStats(u);
+    const lane = i % lanes;
+    const row = Math.floor(i / lanes);
+    let x = xStart + ((isLeft ? row : -row) * 1.5) + rng() * 0.8;
+    if (!isLeft) x = xEnd - row * 1.5 - rng() * 0.8;
+    const y = 4 + (lane / (lanes - 1 || 1)) * (height - 8) + (rng() - 0.5) * 1.5;
+    placed.push({
+      ...u,
+      ...stats,
+      x: Math.max(1, Math.min(width - 1, x)),
+      y: Math.max(1, Math.min(height - 1, y)),
+      side,
+      destroyed: false,
+      uid: `${side}-${i}`,
+    });
+    i++;
+  }
+  return placed;
+}
+
+function distance(a, b) {
+  return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2);
+}
+
+// AI: pick best target — closest visible enemy, weighted by threat
+function pickShootTarget(unit, enemies) {
+  const live = enemies.filter((e) => !e.destroyed);
+  if (live.length === 0) return null;
+  let best = null;
+  let bestScore = -Infinity;
+  for (const e of live) {
+    const d = distance(unit, e);
+    if (d > unit.range) continue;
+    // Score: prefer wounded targets we can finish, then high-value targets
+    const finishBonus = e.currentWounds < unit.shooting * 2 ? 5 : 0;
+    const valueScore = (e.points || 50) / 30;
+    const distancePenalty = d / 10;
+    const score = valueScore + finishBonus - distancePenalty;
+    if (score > bestScore) { bestScore = score; best = e; }
+  }
+  return best;
+}
+
+// AI: pick closest objective the unit isn't already controlling, weighted by emptiness
+function pickMoveTarget(unit, objectives, allUnits) {
+  let best = null;
+  let bestScore = -Infinity;
+  for (const o of objectives) {
+    const d = distance(unit, o);
+    // Friendly units near it (already covered)
+    const friends = allUnits.filter((u) => !u.destroyed && u.side === unit.side && distance(u, o) < 4).length;
+    const enemies = allUnits.filter((u) => !u.destroyed && u.side !== unit.side && distance(u, o) < 4).length;
+    // Want to grab uncontested or contested-by-enemy objectives
+    const score = -d / 5 + enemies * 3 - friends * 2;
+    if (score > bestScore) { bestScore = score; best = o; }
+  }
+  return best;
+}
+
+// Resolve a shooting attack: dice-rolled wounds applied to target
+function resolveShooting(rng, attacker, target) {
+  const hitRoll = attacker.shooting * (0.5 + rng() * 0.5);
+  const wounds = Math.max(0, Math.floor(hitRoll * (1 - (target.armor - 2) * 0.15)));
+  return Math.min(wounds, target.currentWounds);
+}
+
+// Resolve melee combat
+function resolveMelee(rng, attacker, target) {
+  const hits = attacker.melee * (0.5 + rng() * 0.5);
+  const wounds = Math.max(0, Math.floor(hits * (1 - (target.armor - 2) * 0.1)));
+  // Counter-attack
+  const counterHits = target.melee * (0.4 + rng() * 0.5);
+  const counterWounds = Math.max(0, Math.floor(counterHits * (1 - (attacker.armor - 2) * 0.1)));
+  return { dealt: Math.min(wounds, target.currentWounds), taken: Math.min(counterWounds, attacker.currentWounds) };
+}
+
+function applyDamage(unit, dmg) {
+  unit.currentWounds = Math.max(0, unit.currentWounds - dmg);
+  // Recompute model count proportionally
+  unit.modelCount = Math.max(0, Math.ceil((unit.currentWounds / unit.maxWounds) * unit.maxModels));
+  if (unit.currentWounds === 0) {
+    unit.destroyed = true;
+    unit.modelCount = 0;
+  }
+}
+
+// Score control of objectives
+function scoreObjectives(units, objectives) {
+  let leftScore = 0;
+  let rightScore = 0;
+  for (const o of objectives) {
+    const leftHere = units.filter((u) => !u.destroyed && u.side === "left" && distance(u, o) < 3.5).length;
+    const rightHere = units.filter((u) => !u.destroyed && u.side === "right" && distance(u, o) < 3.5).length;
+    if (leftHere > rightHere) leftScore += 5;
+    else if (rightHere > leftHere) rightScore += 5;
+  }
+  return { left: leftScore, right: rightScore };
+}
+
+// Move a unit toward a target point (capped by Move)
+function moveToward(unit, target, terrain, allUnits) {
+  if (!target) return;
+  const d = distance(unit, target);
+  if (d < 0.1) return;
+  const moveDist = Math.min(unit.move, d);
+  const dx = ((target.x - unit.x) / d) * moveDist;
+  const dy = ((target.y - unit.y) / d) * moveDist;
+  const newX = unit.x + dx;
+  const newY = unit.y + dy;
+  // Avoid stacking on top of other units (simple repulsion)
+  const collision = allUnits.find((u) => u !== unit && !u.destroyed && Math.abs(u.x - newX) < 1 && Math.abs(u.y - newY) < 1);
+  if (collision) {
+    unit.x = newX + (Math.random() - 0.5) * 1.5;
+    unit.y = newY + (Math.random() - 0.5) * 1.5;
+  } else {
+    unit.x = newX;
+    unit.y = newY;
+  }
+}
+
+// Main simulation: generates the full battle as a sequence of frames + log
+function simulateBattle(armyLeft, armyRight, formatName, seed) {
+  const fmt = FORMATS[formatName] || FORMATS["Strike Force"];
+  const rng = makeRng(seed);
+
+  const terrain = generateTerrain(rng, fmt.width, fmt.height);
+  const objectives = generateObjectives(rng, fmt.width, fmt.height);
+  const secondaryLeft = SECONDARIES[Math.floor(rng() * SECONDARIES.length)];
+  let secondaryRight = SECONDARIES[Math.floor(rng() * SECONDARIES.length)];
+  while (secondaryRight === secondaryLeft) {
+    secondaryRight = SECONDARIES[Math.floor(rng() * SECONDARIES.length)];
+  }
+
+  let leftUnits = deployArmy(armyLeft, "left", fmt.width, fmt.height, rng);
+  let rightUnits = deployArmy(armyRight, "right", fmt.width, fmt.height, rng);
+  const allUnits = [...leftUnits, ...rightUnits];
+
+  const frames = [];
+  const log = [];
+
+  // Initial frame
+  frames.push({
+    turn: 0,
+    phase: "Deployment",
+    units: allUnits.map((u) => ({ ...u })),
+    leftScore: 0,
+    rightScore: 0,
+  });
+  log.push({ turn: 0, type: "header", text: `=== ${formatName.toUpperCase()} (${fmt.points}pts) ===` });
+  log.push({ turn: 0, type: "info", text: `Left army: ${armyLeft.faction} · ${leftUnits.length} units · Secondary: ${secondaryLeft}` });
+  log.push({ turn: 0, type: "info", text: `Right army: ${armyRight.faction} · ${rightUnits.length} units · Secondary: ${secondaryRight}` });
+  log.push({ turn: 0, type: "info", text: `${objectives.length} objectives placed, ${terrain.length} terrain pieces deployed` });
+
+  let leftScore = 0;
+  let rightScore = 0;
+
+  for (let turn = 1; turn <= fmt.turns; turn++) {
+    log.push({ turn, type: "header", text: `═══ TURN ${turn} ═══` });
+
+    for (const side of ["left", "right"]) {
+      const myUnits = allUnits.filter((u) => u.side === side && !u.destroyed);
+      const enemyUnits = allUnits.filter((u) => u.side !== side && !u.destroyed);
+
+      // MOVEMENT phase
+      for (const unit of myUnits) {
+        const target = pickMoveTarget(unit, objectives, allUnits);
+        moveToward(unit, target, terrain, allUnits);
+      }
+      frames.push({ turn, phase: `${side === "left" ? "L" : "R"} Movement`, units: allUnits.map((u) => ({ ...u })), leftScore, rightScore });
+
+      // SHOOTING phase
+      for (const unit of myUnits) {
+        if (unit.destroyed) continue;
+        const tgt = pickShootTarget(unit, enemyUnits);
+        if (tgt) {
+          const dmg = resolveShooting(rng, unit, tgt);
+          if (dmg > 0) {
+            const beforeModels = tgt.modelCount;
+            applyDamage(tgt, dmg);
+            const lostModels = beforeModels - tgt.modelCount;
+            if (tgt.destroyed) {
+              log.push({ turn, type: "kill", text: `${unit.name} destroys ${tgt.name}!` });
+            } else if (lostModels > 0) {
+              log.push({ turn, type: "shoot", text: `${unit.name} shoots ${tgt.name}: ${dmg} wounds, ${lostModels} model${lostModels>1?"s":""} lost` });
+            }
+          }
+        }
+      }
+      frames.push({ turn, phase: `${side === "left" ? "L" : "R"} Shooting`, units: allUnits.map((u) => ({ ...u })), leftScore, rightScore });
+
+      // CHARGE & MELEE phase
+      for (const unit of myUnits) {
+        if (unit.destroyed) continue;
+        const closeEnemy = enemyUnits.filter((e) => !e.destroyed && distance(unit, e) < 9).sort((a, b) => distance(unit, a) - distance(unit, b))[0];
+        if (closeEnemy && distance(unit, closeEnemy) < 9) {
+          // Charge
+          const chargeRoll = rng() * 12;
+          if (chargeRoll > distance(unit, closeEnemy) - 1) {
+            // Move into engagement
+            unit.x = closeEnemy.x + (unit.x > closeEnemy.x ? 1 : -1);
+            unit.y = closeEnemy.y + (unit.y > closeEnemy.y ? 1 : -1);
+            const result = resolveMelee(rng, unit, closeEnemy);
+            applyDamage(closeEnemy, result.dealt);
+            applyDamage(unit, result.taken);
+            log.push({
+              turn,
+              type: "charge",
+              text: `${unit.name} charges ${closeEnemy.name}: ${result.dealt} dealt, ${result.taken} taken${closeEnemy.destroyed ? " — TARGET DESTROYED" : ""}${unit.destroyed ? " — ATTACKER DESTROYED" : ""}`,
+            });
+          }
+        }
+      }
+      frames.push({ turn, phase: `${side === "left" ? "L" : "R"} Combat`, units: allUnits.map((u) => ({ ...u })), leftScore, rightScore });
+    }
+
+    // SCORING
+    const turnScore = scoreObjectives(allUnits, objectives);
+    leftScore += turnScore.left;
+    rightScore += turnScore.right;
+    log.push({ turn, type: "score", text: `Turn ${turn} scoring → Left +${turnScore.left}, Right +${turnScore.right}` });
+    frames.push({ turn, phase: "End of Turn", units: allUnits.map((u) => ({ ...u })), leftScore, rightScore });
+  }
+
+  // Secondary scoring (simplified)
+  const leftKills = rightUnits.filter((u) => u.destroyed).length;
+  const rightKills = leftUnits.filter((u) => u.destroyed).length;
+  const leftSecondaryPts = leftKills * 3;
+  const rightSecondaryPts = rightKills * 3;
+  leftScore += leftSecondaryPts;
+  rightScore += rightSecondaryPts;
+  log.push({ turn: fmt.turns, type: "header", text: `=== FINAL SCORE ===` });
+  log.push({ turn: fmt.turns, type: "info", text: `Secondary "${secondaryLeft}" → +${leftSecondaryPts}` });
+  log.push({ turn: fmt.turns, type: "info", text: `Secondary "${secondaryRight}" → +${rightSecondaryPts}` });
+  log.push({ turn: fmt.turns, type: "info", text: `LEFT: ${leftScore} VP · RIGHT: ${rightScore} VP` });
+  let winner = leftScore > rightScore ? "left" : (rightScore > leftScore ? "right" : "draw");
+  if (winner === "draw") log.push({ turn: fmt.turns, type: "winner", text: "DRAW" });
+  else log.push({ turn: fmt.turns, type: "winner", text: `${winner === "left" ? armyLeft.faction : armyRight.faction} wins!` });
+
+  return {
+    format: fmt,
+    formatName,
+    terrain,
+    objectives,
+    secondaryLeft,
+    secondaryRight,
+    armyLeft: { faction: armyLeft.faction, color: armyLeft.color, accent: armyLeft.accent, icon: armyLeft.icon },
+    armyRight: { faction: armyRight.faction, color: armyRight.color, accent: armyRight.accent, icon: armyRight.icon },
+    frames,
+    log,
+    leftScore,
+    rightScore,
+    winner,
+    seed,
+  };
+}
+
+// ============================================================
 // REACT COMPONENT
 // ============================================================
 
@@ -4273,6 +4682,7 @@ export default function App() {
   const [importMode, setImportMode] = useState(false);
   const [exportMode, setExportMode] = useState(false);
   const [storageAvailable, setStorageAvailable] = useState(true);
+  const [battleSimOpen, setBattleSimOpen] = useState(false);
 
   const factionData = FACTIONS[faction];
 
@@ -4882,6 +5292,17 @@ export default function App() {
                             cursor: savedArmies.length === 0 ? "not-allowed" : "pointer",
                           }}>
                     {savedPanelOpen ? "▲ HIDE" : `▼ LIST ${savedArmies.length > 0 ? `(${savedArmies.length})` : ""}`}
+                  </button>
+                  <button onClick={() => setBattleSimOpen(true)}
+                          disabled={savedArmies.length === 0}
+                          className="mono-font text-[10px] tracking-widest px-3 py-1 border"
+                          style={{
+                            background: savedArmies.length > 0 ? "linear-gradient(180deg, #5a1a1a, #2a0808)" : "transparent",
+                            color: savedArmies.length > 0 ? "#f5d76e" : "#3a2818",
+                            borderColor: savedArmies.length > 0 ? "#c9b037" : "#2a1f15",
+                            cursor: savedArmies.length === 0 ? "not-allowed" : "pointer",
+                          }}>
+                    ⚔ BATTLE SIM
                   </button>
                 </div>
               </div>
@@ -5664,6 +6085,13 @@ export default function App() {
             POINT VALUES ARE APPROXIMATIONS FOR LIST INSPIRATION · NOT TOURNAMENT-LEGAL
           </div>
         </div>
+
+        {battleSimOpen && (
+            <BattleSim
+                savedArmies={savedArmies}
+                onClose={() => setBattleSimOpen(false)}
+            />
+        )}
       </div>
   );
 }
@@ -5678,6 +6106,480 @@ function Stat({ label, value, accent }) {
         </div>
         <div className="display-font text-base md:text-lg font-semibold" style={{ color: accent }}>
           {value}
+        </div>
+      </div>
+  );
+}
+
+// ============================================================
+// BATTLE SIM REACT COMPONENT
+// ============================================================
+
+function BattleSim({ savedArmies, onClose, generateArmyFn }) {
+  const [leftArmyKey, setLeftArmyKey] = useState(savedArmies[0]?.key || null);
+  const [rightArmyKey, setRightArmyKey] = useState(savedArmies[1]?.key || savedArmies[0]?.key || null);
+  const [format, setFormat] = useState("Strike Force");
+  const [seed, setSeed] = useState(Math.floor(Math.random() * 100000));
+  const [battleData, setBattleData] = useState(null);
+  const [currentFrame, setCurrentFrame] = useState(0);
+  const [playing, setPlaying] = useState(false);
+  const [playSpeed, setPlaySpeed] = useState(800);
+  const [generating, setGenerating] = useState(false);
+
+  const leftArmy = useMemo(() => {
+    if (!leftArmyKey) return null;
+    const entry = savedArmies.find((a) => a.key === leftArmyKey);
+    if (!entry) return null;
+    const fdata = FACTIONS[entry.snapshot.faction];
+    return {
+      faction: entry.snapshot.faction,
+      units: entry.snapshot.units || [],
+      color: fdata?.color,
+      accent: fdata?.accent,
+      icon: fdata?.icon,
+    };
+  }, [leftArmyKey, savedArmies]);
+
+  const rightArmy = useMemo(() => {
+    if (!rightArmyKey) return null;
+    const entry = savedArmies.find((a) => a.key === rightArmyKey);
+    if (!entry) return null;
+    const fdata = FACTIONS[entry.snapshot.faction];
+    return {
+      faction: entry.snapshot.faction,
+      units: entry.snapshot.units || [],
+      color: fdata?.color,
+      accent: fdata?.accent,
+      icon: fdata?.icon,
+    };
+  }, [rightArmyKey, savedArmies]);
+
+  const runSimulation = () => {
+    if (!leftArmy || !rightArmy) return;
+    setGenerating(true);
+    setTimeout(() => {
+      const result = simulateBattle(leftArmy, rightArmy, format, seed);
+      setBattleData(result);
+      setCurrentFrame(0);
+      setGenerating(false);
+    }, 200);
+  };
+
+  const reroll = () => {
+    setSeed(Math.floor(Math.random() * 100000));
+    setBattleData(null);
+    setCurrentFrame(0);
+    setPlaying(false);
+  };
+
+  // Auto-play logic
+  useEffect(() => {
+    if (!playing || !battleData) return;
+    if (currentFrame >= battleData.frames.length - 1) {
+      setPlaying(false);
+      return;
+    }
+    const t = setTimeout(() => setCurrentFrame((f) => f + 1), playSpeed);
+    return () => clearTimeout(t);
+  }, [playing, currentFrame, battleData, playSpeed]);
+
+  // After battle is generated, auto-start playback
+  useEffect(() => {
+    if (battleData && !playing) {
+      const t = setTimeout(() => setPlaying(true), 400);
+      return () => clearTimeout(t);
+    }
+  }, [battleData]);
+
+  const frame = battleData?.frames[currentFrame];
+  const fmt = battleData?.format || FORMATS[format];
+
+  // Log entries up to and including current frame's turn/phase
+  const visibleLog = useMemo(() => {
+    if (!battleData || !frame) return [];
+    return battleData.log.filter((entry) => {
+      if (entry.turn < frame.turn) return true;
+      if (entry.turn === frame.turn && frame.turn === 0) return true;
+      if (entry.turn === frame.turn) {
+        // Show entries up to current phase by index in turn
+        return battleData.frames
+            .slice(0, currentFrame + 1)
+            .some((f) => f.turn === entry.turn);
+      }
+      return false;
+    });
+  }, [battleData, frame, currentFrame]);
+
+  // Compute unit display position with smooth lerp from previous frame
+  const prevFrame = battleData?.frames[Math.max(0, currentFrame - 1)];
+
+  return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 md:p-6"
+           style={{ background: "rgba(0,0,0,0.92)" }}>
+        <div className="border w-full h-full max-w-7xl flex flex-col"
+             style={{ background: "rgba(15,8,5,0.98)", borderColor: "#5a4030", boxShadow: "0 0 80px rgba(201,176,55,0.15)" }}>
+          {/* HEADER */}
+          <div className="flex items-center justify-between px-4 md:px-6 py-3 border-b" style={{ borderColor: "#3a2818" }}>
+            <div>
+              <div className="display-font text-xl md:text-2xl tracking-widest font-bold"
+                   style={{ background: "linear-gradient(180deg, #f5d76e, #c9b037)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                ⚔ BATTLE SIMULATOR ⚔
+              </div>
+              <div className="mono-font text-[10px] tracking-widest text-stone-600 mt-0.5">
+                ORDO TACTICUS · WAR-GAMES DIVISION
+              </div>
+            </div>
+            <button onClick={onClose} className="mono-font text-xs tracking-widest px-3 py-1.5 border"
+                    style={{ color: "#a05050", borderColor: "#3a1818" }}>
+              ✕ CLOSE
+            </button>
+          </div>
+
+          {/* SETUP CONTROLS - shown only before battle */}
+          {!battleData && (
+              <div className="flex-1 overflow-y-auto p-4 md:p-6">
+                {savedArmies.length < 1 ? (
+                    <div className="text-center py-12">
+                      <div className="display-font text-xl text-stone-500 italic mb-3">
+                        ⸻ SAVE AT LEAST ONE ARMY TO BEGIN ⸻
+                      </div>
+                      <div className="mono-font text-xs text-stone-600 max-w-md mx-auto">
+                        Generate an army and click ✚ SAVE CURRENT in the saved armies panel. You can battle a saved army against itself, or save two different armies for a proper matchup.
+                      </div>
+                    </div>
+                ) : (
+                    <>
+                      <div className="grid md:grid-cols-2 gap-4 md:gap-6 mb-6">
+                        {/* LEFT ARMY */}
+                        <div>
+                          <div className="display-font text-xs tracking-[0.3em] mb-2" style={{ color: "#c9b037" }}>
+                            ◆ LEFT ARMY (Attacker)
+                          </div>
+                          <select className="gothic" value={leftArmyKey || ""} onChange={(e) => setLeftArmyKey(e.target.value)}>
+                            {savedArmies.map((a) => (
+                                <option key={a.key} value={a.key}>
+                                  {a.name} · {a.snapshot.faction}
+                                </option>
+                            ))}
+                          </select>
+                          {leftArmy && (
+                              <div className="mt-2 p-3 border" style={{ background: `${leftArmy.color}22`, borderColor: leftArmy.accent }}>
+                                <div className="flex items-center gap-3">
+                                  <span className="text-2xl" style={{ color: leftArmy.accent }}>{leftArmy.icon}</span>
+                                  <div>
+                                    <div className="display-font text-sm font-bold tracking-wider" style={{ color: leftArmy.accent }}>
+                                      {leftArmy.faction.toUpperCase()}
+                                    </div>
+                                    <div className="mono-font text-[10px] text-stone-500">
+                                      {leftArmy.units.length} units
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                          )}
+                        </div>
+                        {/* RIGHT ARMY */}
+                        <div>
+                          <div className="display-font text-xs tracking-[0.3em] mb-2" style={{ color: "#c9b037" }}>
+                            ◆ RIGHT ARMY (Defender)
+                          </div>
+                          <select className="gothic" value={rightArmyKey || ""} onChange={(e) => setRightArmyKey(e.target.value)}>
+                            {savedArmies.map((a) => (
+                                <option key={a.key} value={a.key}>
+                                  {a.name} · {a.snapshot.faction}
+                                </option>
+                            ))}
+                          </select>
+                          {rightArmy && (
+                              <div className="mt-2 p-3 border" style={{ background: `${rightArmy.color}22`, borderColor: rightArmy.accent }}>
+                                <div className="flex items-center gap-3">
+                                  <span className="text-2xl" style={{ color: rightArmy.accent }}>{rightArmy.icon}</span>
+                                  <div>
+                                    <div className="display-font text-sm font-bold tracking-wider" style={{ color: rightArmy.accent }}>
+                                      {rightArmy.faction.toUpperCase()}
+                                    </div>
+                                    <div className="mono-font text-[10px] text-stone-500">
+                                      {rightArmy.units.length} units
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* FORMAT */}
+                      <div className="mb-6">
+                        <div className="display-font text-xs tracking-[0.3em] mb-3" style={{ color: "#c9b037" }}>
+                          ◆ GAME FORMAT
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                          {Object.entries(FORMATS).map(([name, f]) => {
+                            const active = format === name;
+                            return (
+                                <button key={name} onClick={() => setFormat(name)}
+                                        className="p-3 text-left border"
+                                        style={{
+                                          background: active ? "#c9b03722" : "rgba(0,0,0,0.4)",
+                                          borderColor: active ? "#c9b037" : "#2a1f15",
+                                        }}>
+                                  <div className="display-font text-sm font-bold tracking-wider" style={{ color: active ? "#c9b037" : "#d4c5a0" }}>
+                                    {name.toUpperCase()}
+                                  </div>
+                                  <div className="mono-font text-[10px] text-stone-500 mt-1">
+                                    {f.points}pts · {f.width}×{f.height}"
+                                  </div>
+                                  <div className="text-[11px] text-stone-600 italic mt-1 leading-tight">
+                                    {f.description}
+                                  </div>
+                                </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* SEED */}
+                      <div className="mb-6 flex items-center gap-3 flex-wrap">
+                        <div className="display-font text-xs tracking-[0.3em]" style={{ color: "#c9b037" }}>
+                          ◆ BATTLE SEED:
+                        </div>
+                        <span className="mono-font text-sm" style={{ color: "#d4c5a0" }}>{seed}</span>
+                        <button onClick={() => setSeed(Math.floor(Math.random() * 100000))}
+                                className="mono-font text-[10px] tracking-widest px-3 py-1 border"
+                                style={{ color: "#d4c5a0", borderColor: "#2a1f15" }}>
+                          🎲 NEW SEED
+                        </button>
+                        <span className="mono-font text-[10px] text-stone-600">(same seed = same battle)</span>
+                      </div>
+
+                      {/* GO BUTTON */}
+                      <div className="flex justify-center">
+                        <button onClick={runSimulation} disabled={!leftArmy || !rightArmy || generating}
+                                className="display-font px-12 py-4 text-sm tracking-[0.3em] font-bold border-2"
+                                style={{
+                                  background: "linear-gradient(180deg, #5a1a1a 0%, #1a0808 100%)",
+                                  color: "#f5d76e",
+                                  borderColor: "#c9b037",
+                                  cursor: generating ? "wait" : "pointer",
+                                }}>
+                          {generating ? "✦ DEPLOYING ARMIES ✦" : "⚔ BEGIN BATTLE ⚔"}
+                        </button>
+                      </div>
+                    </>
+                )}
+              </div>
+          )}
+
+          {/* BATTLE DISPLAY */}
+          {battleData && frame && (
+              <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
+                {/* LEFT: BATTLE BOARD */}
+                <div className="flex-1 flex flex-col p-3 md:p-4 overflow-hidden">
+                  {/* Score header */}
+                  <div className="grid grid-cols-3 gap-2 mb-2 mono-font text-xs tracking-wider">
+                    <div className="text-center p-2 border" style={{ background: `${battleData.armyLeft.color}33`, borderColor: battleData.armyLeft.accent, color: battleData.armyLeft.accent }}>
+                      <div className="display-font text-lg">{battleData.armyLeft.icon} {battleData.armyLeft.faction}</div>
+                      <div className="text-2xl font-bold">{frame.leftScore} VP</div>
+                    </div>
+                    <div className="text-center p-2 border" style={{ background: "rgba(0,0,0,0.5)", borderColor: "#3a2818" }}>
+                      <div className="display-font text-base text-stone-400">{frame.phase}</div>
+                      <div className="text-stone-500">Turn {frame.turn} / {fmt.turns}</div>
+                    </div>
+                    <div className="text-center p-2 border" style={{ background: `${battleData.armyRight.color}33`, borderColor: battleData.armyRight.accent, color: battleData.armyRight.accent }}>
+                      <div className="display-font text-lg">{battleData.armyRight.icon} {battleData.armyRight.faction}</div>
+                      <div className="text-2xl font-bold">{frame.rightScore} VP</div>
+                    </div>
+                  </div>
+
+                  {/* Board */}
+                  <div className="flex-1 border relative overflow-hidden" style={{ borderColor: "#3a2818", background: "#0a0604" }}>
+                    <svg viewBox={`0 0 ${fmt.width} ${fmt.height}`} className="w-full h-full" preserveAspectRatio="xMidYMid meet">
+                      {/* Battlefield base */}
+                      <defs>
+                        <pattern id="grid" width="2" height="2" patternUnits="userSpaceOnUse">
+                          <path d="M 2 0 L 0 0 0 2" fill="none" stroke="#1a0f08" strokeWidth="0.05" />
+                        </pattern>
+                      </defs>
+                      <rect width={fmt.width} height={fmt.height} fill="url(#grid)" />
+
+                      {/* Deployment zones */}
+                      <rect x="0" y="0" width="8" height={fmt.height} fill={battleData.armyLeft.color} opacity="0.08" />
+                      <rect x={fmt.width - 8} y="0" width="8" height={fmt.height} fill={battleData.armyRight.color} opacity="0.08" />
+
+                      {/* Terrain */}
+                      {battleData.terrain.map((t) => (
+                          <g key={t.id}>
+                            <rect x={t.x} y={t.y} width={t.w} height={t.h} fill={t.color} stroke={t.border} strokeWidth="0.15" opacity="0.85" />
+                            <text x={t.x + t.w / 2} y={t.y + t.h / 2} fontSize="0.9" fill="#5a4030" textAnchor="middle" dominantBaseline="middle" fontFamily="monospace">
+                              {t.name === "Ruins" ? "⌂" : t.name === "Crater" ? "○" : t.name === "Forest" ? "♣" : t.name === "Hill" ? "▲" : "✕"}
+                            </text>
+                          </g>
+                      ))}
+
+                      {/* Objectives */}
+                      {battleData.objectives.map((o) => {
+                        const leftHere = frame.units.filter((u) => !u.destroyed && u.side === "left" && Math.sqrt((u.x - o.x) ** 2 + (u.y - o.y) ** 2) < 3.5).length;
+                        const rightHere = frame.units.filter((u) => !u.destroyed && u.side === "right" && Math.sqrt((u.x - o.x) ** 2 + (u.y - o.y) ** 2) < 3.5).length;
+                        const controller = leftHere > rightHere ? battleData.armyLeft : (rightHere > leftHere ? battleData.armyRight : null);
+                        return (
+                            <g key={o.id}>
+                              <circle cx={o.x} cy={o.y} r="3.5" fill="none" stroke={controller?.accent || "#5a4030"} strokeWidth="0.15" strokeDasharray="0.5,0.3" opacity="0.6" />
+                              <circle cx={o.x} cy={o.y} r="1.2" fill={controller?.accent || "#5a4030"} opacity="0.8" />
+                              <text x={o.x} y={o.y + 0.4} fontSize="0.9" fill="#0a0604" textAnchor="middle" dominantBaseline="middle" fontFamily="monospace" fontWeight="bold">
+                                ⊕
+                              </text>
+                            </g>
+                        );
+                      })}
+
+                      {/* Units */}
+                      {frame.units.filter((u) => !u.destroyed).map((u) => {
+                        const isLeft = u.side === "left";
+                        const army = isLeft ? battleData.armyLeft : battleData.armyRight;
+                        const radius = 0.9 + Math.min(1.5, Math.sqrt(u.maxModels) * 0.4);
+                        const healthPct = u.currentWounds / u.maxWounds;
+                        // Find prev position for smooth animation indicator
+                        const prevUnit = prevFrame?.units.find((pu) => pu.uid === u.uid);
+                        const moved = prevUnit && (Math.abs(prevUnit.x - u.x) > 0.3 || Math.abs(prevUnit.y - u.y) > 0.3);
+                        return (
+                            <g key={u.uid}>
+                              {/* Movement trail */}
+                              {moved && prevUnit && !prevUnit.destroyed && (
+                                  <line x1={prevUnit.x} y1={prevUnit.y} x2={u.x} y2={u.y} stroke={army.accent} strokeWidth="0.15" strokeDasharray="0.4,0.3" opacity="0.4" />
+                              )}
+                              {/* Unit base */}
+                              <circle cx={u.x} cy={u.y} r={radius} fill={army.color} stroke={army.accent} strokeWidth="0.2" opacity={healthPct > 0.5 ? 1 : 0.7} />
+                              {/* Health ring */}
+                              <circle cx={u.x} cy={u.y} r={radius * 1.15} fill="none" stroke={healthPct > 0.6 ? "#5a8b2a" : healthPct > 0.3 ? "#c9b037" : "#a05050"} strokeWidth="0.15" strokeDasharray={`${healthPct * Math.PI * 2 * radius * 1.15} ${(1 - healthPct) * Math.PI * 2 * radius * 1.15}`} transform={`rotate(-90 ${u.x} ${u.y})`} opacity="0.8" />
+                              {/* Role icon */}
+                              <text x={u.x} y={u.y + 0.4} fontSize={radius * 1.1} fill={army.accent} textAnchor="middle" dominantBaseline="middle" fontFamily="serif" fontWeight="bold">
+                                {u.role === "hq" ? "♛" : u.role === "troops" ? "▣" : u.role === "elites" ? "✦" : u.role === "fast" ? "▶" : u.role === "heavy" ? "◆" : "▭"}
+                              </text>
+                              {/* Model count badge */}
+                              {u.modelCount > 1 && (
+                                  <text x={u.x + radius * 0.7} y={u.y - radius * 0.7} fontSize="0.8" fill="#f5d76e" textAnchor="middle" dominantBaseline="middle" fontFamily="monospace" fontWeight="bold" stroke="#0a0604" strokeWidth="0.1">
+                                    {u.modelCount}
+                                  </text>
+                              )}
+                            </g>
+                        );
+                      })}
+
+                      {/* Destroyed unit X markers */}
+                      {frame.units.filter((u) => u.destroyed).map((u) => (
+                          <g key={u.uid + "-dead"} opacity="0.4">
+                            <text x={u.x} y={u.y + 0.5} fontSize="2" fill="#a05050" textAnchor="middle" dominantBaseline="middle" fontFamily="serif">
+                              ✕
+                            </text>
+                          </g>
+                      ))}
+                    </svg>
+                  </div>
+
+                  {/* Playback controls */}
+                  <div className="flex items-center justify-between gap-2 mt-2 flex-wrap">
+                    <div className="flex gap-1 items-center">
+                      <button onClick={() => { setCurrentFrame(0); setPlaying(false); }}
+                              className="mono-font text-[11px] tracking-wider px-2 py-1 border"
+                              style={{ color: "#d4c5a0", borderColor: "#2a1f15" }}>⏮</button>
+                      <button onClick={() => { setCurrentFrame((f) => Math.max(0, f - 1)); setPlaying(false); }}
+                              className="mono-font text-[11px] tracking-wider px-2 py-1 border"
+                              style={{ color: "#d4c5a0", borderColor: "#2a1f15" }}>◀</button>
+                      <button onClick={() => setPlaying((p) => !p)}
+                              className="mono-font text-[11px] tracking-widest px-3 py-1 border"
+                              style={{ background: playing ? "#c9b037" : "transparent", color: playing ? "#0a0604" : "#c9b037", borderColor: "#c9b037" }}>
+                        {playing ? "❚❚ PAUSE" : "▶ PLAY"}
+                      </button>
+                      <button onClick={() => { setCurrentFrame((f) => Math.min(battleData.frames.length - 1, f + 1)); setPlaying(false); }}
+                              className="mono-font text-[11px] tracking-wider px-2 py-1 border"
+                              style={{ color: "#d4c5a0", borderColor: "#2a1f15" }}>▶</button>
+                      <button onClick={() => { setCurrentFrame(battleData.frames.length - 1); setPlaying(false); }}
+                              className="mono-font text-[11px] tracking-wider px-2 py-1 border"
+                              style={{ color: "#d4c5a0", borderColor: "#2a1f15" }}>⏭</button>
+                    </div>
+                    <div className="flex gap-1 items-center">
+                      <span className="mono-font text-[10px] text-stone-500">SPEED</span>
+                      <button onClick={() => setPlaySpeed(2000)} className="mono-font text-[10px] px-2 py-1 border"
+                              style={{ background: playSpeed === 2000 ? "#c9b037" : "transparent", color: playSpeed === 2000 ? "#0a0604" : "#d4c5a0", borderColor: "#2a1f15" }}>0.5x</button>
+                      <button onClick={() => setPlaySpeed(800)} className="mono-font text-[10px] px-2 py-1 border"
+                              style={{ background: playSpeed === 800 ? "#c9b037" : "transparent", color: playSpeed === 800 ? "#0a0604" : "#d4c5a0", borderColor: "#2a1f15" }}>1x</button>
+                      <button onClick={() => setPlaySpeed(300)} className="mono-font text-[10px] px-2 py-1 border"
+                              style={{ background: playSpeed === 300 ? "#c9b037" : "transparent", color: playSpeed === 300 ? "#0a0604" : "#d4c5a0", borderColor: "#2a1f15" }}>2x</button>
+                    </div>
+                    <div className="mono-font text-[10px] text-stone-500">
+                      Frame {currentFrame + 1} / {battleData.frames.length}
+                    </div>
+                    <button onClick={reroll} className="mono-font text-[11px] tracking-widest px-3 py-1 border"
+                            style={{ color: "#f5d76e", borderColor: "#c9b037" }}>
+                      🎲 REROLL
+                    </button>
+                  </div>
+                </div>
+
+                {/* RIGHT: BATTLE LOG */}
+                <div className="md:w-80 lg:w-96 border-t md:border-t-0 md:border-l overflow-y-auto p-3" style={{ borderColor: "#3a2818", background: "rgba(0,0,0,0.5)" }}>
+                  <div className="display-font text-xs tracking-[0.3em] mb-3 sticky top-0 py-2" style={{ color: "#c9b037", background: "rgba(0,0,0,0.85)" }}>
+                    ⸺ BATTLE LOG
+                  </div>
+                  <div className="mono-font text-[11px] space-y-1 leading-relaxed">
+                    {visibleLog.map((entry, i) => {
+                      const colors = {
+                        header: "#c9b037",
+                        info: "#8a7a5a",
+                        shoot: "#d4c5a0",
+                        charge: "#e8a87c",
+                        kill: "#a05050",
+                        score: "#5a8b2a",
+                        winner: "#f5d76e",
+                      };
+                      return (
+                          <div key={i} style={{
+                            color: colors[entry.type] || "#d4c5a0",
+                            fontWeight: entry.type === "header" || entry.type === "winner" ? "bold" : "normal",
+                            opacity: 0,
+                            animation: "fadeup 0.4s ease-out forwards",
+                            animationDelay: `${Math.min(i * 0.02, 0.5)}s`,
+                          }}>
+                            {entry.text}
+                          </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Final result panel */}
+                  {currentFrame === battleData.frames.length - 1 && (
+                      <div className="mt-4 p-4 border text-center"
+                           style={{
+                             background: battleData.winner === "left"
+                                 ? `${battleData.armyLeft.color}33`
+                                 : (battleData.winner === "right" ? `${battleData.armyRight.color}33` : "rgba(0,0,0,0.5)"),
+                             borderColor: battleData.winner === "left" ? battleData.armyLeft.accent : (battleData.winner === "right" ? battleData.armyRight.accent : "#5a4030"),
+                           }}>
+                        <div className="display-font text-xs tracking-[0.3em] text-stone-500 mb-2">
+                          ⸺ VICTOR ⸺
+                        </div>
+                        {battleData.winner === "draw" ? (
+                            <div className="display-font text-2xl tracking-widest text-stone-300">
+                              DRAW
+                            </div>
+                        ) : (
+                            <div>
+                              <div className="text-3xl mb-1" style={{ color: battleData.winner === "left" ? battleData.armyLeft.accent : battleData.armyRight.accent }}>
+                                {battleData.winner === "left" ? battleData.armyLeft.icon : battleData.armyRight.icon}
+                              </div>
+                              <div className="display-font text-lg tracking-widest font-bold" style={{ color: battleData.winner === "left" ? battleData.armyLeft.accent : battleData.armyRight.accent }}>
+                                {battleData.winner === "left" ? battleData.armyLeft.faction : battleData.armyRight.faction}
+                              </div>
+                              <div className="mono-font text-sm mt-2 text-stone-400">
+                                {battleData.leftScore} — {battleData.rightScore}
+                              </div>
+                            </div>
+                        )}
+                      </div>
+                  )}
+                </div>
+              </div>
+          )}
         </div>
       </div>
   );
