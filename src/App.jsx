@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 // Fallback storage that uses localStorage when window.storage isn't available
 if (typeof window !== "undefined" && !window.storage) {
   window.storage = {
