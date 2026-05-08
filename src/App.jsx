@@ -4115,10 +4115,24 @@ function generateArmy({
                         enhancementsEnabled,
                         pinnedUnits,
                         comboName,
+                        pointOverrides,
                       }) {
   const factionData = FACTIONS[faction];
   const subData = factionData.subFactions[subFaction];
-  const unitPool = mergeUnitPools(subData.units, subData.extra);
+  let unitPool = mergeUnitPools(subData.units, subData.extra);
+  // Apply point overrides to the unit pool if provided
+  if (pointOverrides) {
+    const out = {};
+    for (const role of Object.keys(unitPool)) {
+      out[role] = unitPool[role].map((u) => {
+        const key = `${faction}|${u.name}`;
+        const o = pointOverrides[key];
+        if (o && typeof o.points === "number") return { ...u, points: o.points };
+        return u;
+      });
+    }
+    unitPool = out;
+  }
   const weights = { ...ARMY_TYPES[armyType].weights };
   const army = [];
   let spent = 0;
@@ -4684,7 +4698,41 @@ export default function App() {
   const [storageAvailable, setStorageAvailable] = useState(true);
   const [battleSimOpen, setBattleSimOpen] = useState(false);
 
+  // Points override system: { "Faction|UnitName": { points: number, updatedAt: number } }
+  const [pointOverrides, setPointOverrides] = useState({});
+  const [overridesPanelOpen, setOverridesPanelOpen] = useState(false);
+  const [overrideFaction, setOverrideFaction] = useState("Space Marines");
+  const [overrideEditDrafts, setOverrideEditDrafts] = useState({}); // unitKey -> string draft
+  const [overrideExportMode, setOverrideExportMode] = useState(false);
+  const [overrideImportMode, setOverrideImportMode] = useState(false);
+  const [overrideExportText, setOverrideExportText] = useState("");
+  const [overrideImportText, setOverrideImportText] = useState("");
+
   const factionData = FACTIONS[faction];
+
+  // Helper: get effective points for a unit (override if set, else base)
+  const getUnitPoints = (unitName, factionName, basePoints) => {
+    const key = `${factionName}|${unitName}`;
+    const override = pointOverrides[key];
+    if (override && typeof override.points === "number") return override.points;
+    return basePoints;
+  };
+
+  // Apply overrides to a faction's unit pool (returns deep-copied pool with overridden points)
+  const applyOverridesToPool = (pool, factionName) => {
+    const out = {};
+    for (const role of Object.keys(pool)) {
+      out[role] = pool[role].map((u) => {
+        const key = `${factionName}|${u.name}`;
+        const override = pointOverrides[key];
+        if (override && typeof override.points === "number") {
+          return { ...u, points: override.points, _baseCost: u.points, _overridden: true };
+        }
+        return u;
+      });
+    }
+    return out;
+  };
 
   // Load saved armies from window.storage on mount
   useEffect(() => {
@@ -4719,6 +4767,35 @@ export default function App() {
     })();
     return () => { cancelled = true; };
   }, []);
+
+  // Load point overrides from storage on mount
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      if (typeof window === "undefined" || !window.storage) return;
+      try {
+        const r = await window.storage.get("pointOverrides:all");
+        if (cancelled) return;
+        if (r && r.value) {
+          const data = JSON.parse(r.value);
+          if (data && typeof data === "object") setPointOverrides(data);
+        }
+      } catch (e) {
+        // no overrides yet, fine
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  // Persist overrides whenever they change
+  const persistOverrides = async (next) => {
+    if (typeof window === "undefined" || !window.storage) return;
+    try {
+      await window.storage.set("pointOverrides:all", JSON.stringify(next));
+    } catch (e) {
+      // ignore
+    }
+  };
 
   // Auto-clear status message after 2.5 seconds
   useEffect(() => {
@@ -4759,12 +4836,13 @@ export default function App() {
   const detachmentData = factionData.detachments[detachment];
   const combos = COMBOS[faction] || [];
 
-  // Build the merged unit pool for the current faction/sub-faction
+  // Build the merged unit pool for the current faction/sub-faction (with overrides applied)
   const currentUnitPool = useMemo(() => {
     const subData = factionData.subFactions[subFaction];
     if (!subData) return {};
-    return mergeUnitPools(subData.units, subData.extra);
-  }, [faction, subFaction, factionData]);
+    const merged = mergeUnitPools(subData.units, subData.extra);
+    return applyOverridesToPool(merged, faction);
+  }, [faction, subFaction, factionData, pointOverrides]);
 
   // Flat lookup of all units in current pool by name
   const unitLookup = useMemo(() => {
@@ -4792,6 +4870,7 @@ export default function App() {
         enhancementsEnabled,
         pinnedUnits,
         comboName: selectedCombo,
+        pointOverrides,
       });
       setArmy(result);
       setGenerating(false);
@@ -5303,6 +5382,16 @@ export default function App() {
                             cursor: savedArmies.length === 0 ? "not-allowed" : "pointer",
                           }}>
                     ⚔ BATTLE SIM
+                  </button>
+                  <button onClick={() => setOverridesPanelOpen(true)}
+                          className="mono-font text-[10px] tracking-widest px-3 py-1 border"
+                          style={{
+                            background: Object.keys(pointOverrides).length > 0 ? "rgba(201,176,55,0.15)" : "transparent",
+                            color: "#d4c5a0",
+                            borderColor: Object.keys(pointOverrides).length > 0 ? "#c9b037" : "#2a1f15",
+                          }}
+                          title="Edit point values to match the latest Munitorum Field Manual">
+                    ⚒ POINTS{Object.keys(pointOverrides).length > 0 ? ` (${Object.keys(pointOverrides).length})` : ""}
                   </button>
                 </div>
               </div>
@@ -6092,6 +6181,27 @@ export default function App() {
                 onClose={() => setBattleSimOpen(false)}
             />
         )}
+
+        {overridesPanelOpen && (
+            <OverridesPanel
+                pointOverrides={pointOverrides}
+                setPointOverrides={setPointOverrides}
+                persistOverrides={persistOverrides}
+                overrideFaction={overrideFaction}
+                setOverrideFaction={setOverrideFaction}
+                overrideEditDrafts={overrideEditDrafts}
+                setOverrideEditDrafts={setOverrideEditDrafts}
+                overrideExportMode={overrideExportMode}
+                setOverrideExportMode={setOverrideExportMode}
+                overrideImportMode={overrideImportMode}
+                setOverrideImportMode={setOverrideImportMode}
+                overrideExportText={overrideExportText}
+                setOverrideExportText={setOverrideExportText}
+                overrideImportText={overrideImportText}
+                setOverrideImportText={setOverrideImportText}
+                onClose={() => setOverridesPanelOpen(false)}
+            />
+        )}
       </div>
   );
 }
@@ -6584,4 +6694,344 @@ function BattleSim({ savedArmies, onClose, generateArmyFn }) {
       </div>
   );
 }
+
+function OverridesPanel({
+                          pointOverrides,
+                          setPointOverrides,
+                          persistOverrides,
+                          overrideFaction,
+                          setOverrideFaction,
+                          overrideEditDrafts,
+                          setOverrideEditDrafts,
+                          overrideExportMode,
+                          setOverrideExportMode,
+                          overrideImportMode,
+                          setOverrideImportMode,
+                          overrideExportText,
+                          setOverrideExportText,
+                          overrideImportText,
+                          setOverrideImportText,
+                          onClose,
+                        }) {
+  const [filter, setFilter] = useState("");
+  const [importStatus, setImportStatus] = useState("");
+
+  // Build the deduped list of all units in the chosen faction
+  const factionUnits = useMemo(() => {
+    const f = FACTIONS[overrideFaction];
+    if (!f) return [];
+    const seen = {};
+    for (const sfName of Object.keys(f.subFactions)) {
+      const sf = f.subFactions[sfName];
+      const merged = mergeUnitPools(sf.units, sf.extra);
+      for (const role of Object.keys(merged)) {
+        for (const u of merged[role]) {
+          if (!seen[u.name]) seen[u.name] = { ...u, role };
+        }
+      }
+    }
+    return Object.values(seen).sort((a, b) => a.name.localeCompare(b.name));
+  }, [overrideFaction]);
+
+  const filteredUnits = useMemo(() => {
+    if (!filter.trim()) return factionUnits;
+    const lower = filter.toLowerCase();
+    return factionUnits.filter((u) => u.name.toLowerCase().includes(lower));
+  }, [factionUnits, filter]);
+
+  // Count of overrides per faction
+  const overrideCountByFaction = useMemo(() => {
+    const counts = {};
+    for (const key of Object.keys(pointOverrides)) {
+      const fName = key.split("|")[0];
+      counts[fName] = (counts[fName] || 0) + 1;
+    }
+    return counts;
+  }, [pointOverrides]);
+
+  const totalOverrides = Object.keys(pointOverrides).length;
+
+  const setOverride = (unitName, points) => {
+    const key = `${overrideFaction}|${unitName}`;
+    const next = { ...pointOverrides };
+    if (points === null || points === undefined || points === "") {
+      delete next[key];
+    } else {
+      next[key] = { points: parseInt(points), updatedAt: Date.now() };
+    }
+    setPointOverrides(next);
+    persistOverrides(next);
+  };
+
+  const handleSaveOverride = (unitName) => {
+    const draft = overrideEditDrafts[unitName];
+    if (draft === undefined || draft === "") return;
+    const num = parseInt(draft);
+    if (Number.isFinite(num) && num >= 0 && num <= 9999) {
+      setOverride(unitName, num);
+      const nextDrafts = { ...overrideEditDrafts };
+      delete nextDrafts[unitName];
+      setOverrideEditDrafts(nextDrafts);
+    }
+  };
+
+  const handleResetUnit = (unitName) => {
+    setOverride(unitName, null);
+    const nextDrafts = { ...overrideEditDrafts };
+    delete nextDrafts[unitName];
+    setOverrideEditDrafts(nextDrafts);
+  };
+
+  const handleResetFaction = () => {
+    if (!confirm(`Remove all ${overrideCountByFaction[overrideFaction] || 0} overrides for ${overrideFaction}?`)) return;
+    const next = {};
+    for (const key of Object.keys(pointOverrides)) {
+      if (!key.startsWith(`${overrideFaction}|`)) next[key] = pointOverrides[key];
+    }
+    setPointOverrides(next);
+    persistOverrides(next);
+    setOverrideEditDrafts({});
+  };
+
+  const handleResetAll = () => {
+    if (!confirm(`Remove ALL ${totalOverrides} point overrides across every faction?`)) return;
+    setPointOverrides({});
+    persistOverrides({});
+    setOverrideEditDrafts({});
+  };
+
+  const handleExport = () => {
+    const text = JSON.stringify(pointOverrides, null, 2);
+    setOverrideExportText(text);
+    setOverrideExportMode(true);
+    setOverrideImportMode(false);
+  };
+
+  const handleImport = () => {
+    try {
+      const data = JSON.parse(overrideImportText);
+      if (!data || typeof data !== "object") throw new Error("Not an object");
+      // Basic validation: keys should be "Faction|Unit" and values should have .points
+      let imported = 0;
+      const next = { ...pointOverrides };
+      for (const key of Object.keys(data)) {
+        const v = data[key];
+        if (v && typeof v === "object" && typeof v.points === "number" && key.includes("|")) {
+          next[key] = { points: v.points, updatedAt: v.updatedAt || Date.now() };
+          imported++;
+        }
+      }
+      setPointOverrides(next);
+      persistOverrides(next);
+      setImportStatus(`✓ Imported ${imported} override${imported !== 1 ? "s" : ""}`);
+      setTimeout(() => setImportStatus(""), 3000);
+      setOverrideImportText("");
+      setOverrideImportMode(false);
+    } catch (e) {
+      setImportStatus("✗ Invalid format — must be JSON with {Faction|Unit: {points: number}}");
+      setTimeout(() => setImportStatus(""), 4000);
+    }
+  };
+
+  return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 md:p-6"
+           style={{ background: "rgba(0,0,0,0.92)" }}>
+        <div className="border w-full max-w-5xl max-h-full flex flex-col"
+             style={{ background: "rgba(15,8,5,0.98)", borderColor: "#5a4030", boxShadow: "0 0 80px rgba(201,176,55,0.15)" }}>
+
+          {/* HEADER */}
+          <div className="flex items-center justify-between px-4 md:px-6 py-3 border-b" style={{ borderColor: "#3a2818" }}>
+            <div>
+              <div className="display-font text-xl md:text-2xl tracking-widest font-bold"
+                   style={{ background: "linear-gradient(180deg, #f5d76e, #c9b037)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                ⚒ POINTS OVERRIDES ⚒
+              </div>
+              <div className="mono-font text-[10px] tracking-widest text-stone-600 mt-0.5">
+                MUNITORUM ADJUSTMENTS · {totalOverrides} TOTAL OVERRIDE{totalOverrides !== 1 ? "S" : ""}
+              </div>
+            </div>
+            <button onClick={onClose} className="mono-font text-xs tracking-widest px-3 py-1.5 border"
+                    style={{ color: "#a05050", borderColor: "#3a1818" }}>
+              ✕ CLOSE
+            </button>
+          </div>
+
+          {/* CONTROLS */}
+          <div className="px-4 md:px-6 py-3 border-b flex flex-wrap items-center gap-2" style={{ borderColor: "#3a2818", background: "rgba(0,0,0,0.3)" }}>
+            <select className="gothic" value={overrideFaction} onChange={(e) => setOverrideFaction(e.target.value)} style={{ minWidth: "180px" }}>
+              {Object.keys(FACTIONS).map((f) => (
+                  <option key={f} value={f}>
+                    {f}{overrideCountByFaction[f] ? ` (${overrideCountByFaction[f]} edited)` : ""}
+                  </option>
+              ))}
+            </select>
+            <input type="text" placeholder="Filter units..." value={filter} onChange={(e) => setFilter(e.target.value)}
+                   className="gothic" style={{ flex: 1, minWidth: "160px" }} />
+            {overrideCountByFaction[overrideFaction] > 0 && (
+                <button onClick={handleResetFaction}
+                        className="mono-font text-[10px] tracking-widest px-3 py-1.5 border"
+                        style={{ color: "#e8a87c", borderColor: "#5a3a25" }}>
+                  ↺ RESET FACTION
+                </button>
+            )}
+            <button onClick={handleExport}
+                    disabled={totalOverrides === 0}
+                    className="mono-font text-[10px] tracking-widest px-3 py-1.5 border"
+                    style={{ color: totalOverrides === 0 ? "#3a2818" : "#d4c5a0", borderColor: "#2a1f15", cursor: totalOverrides === 0 ? "not-allowed" : "pointer" }}>
+              ↗ EXPORT
+            </button>
+            <button onClick={() => { setOverrideImportMode((m) => !m); setOverrideExportMode(false); }}
+                    className="mono-font text-[10px] tracking-widest px-3 py-1.5 border"
+                    style={{ background: overrideImportMode ? "#c9b037" : "transparent", color: overrideImportMode ? "#0a0806" : "#d4c5a0", borderColor: "#2a1f15" }}>
+              ↙ IMPORT
+            </button>
+            {totalOverrides > 0 && (
+                <button onClick={handleResetAll}
+                        className="mono-font text-[10px] tracking-widest px-3 py-1.5 border"
+                        style={{ color: "#a05050", borderColor: "#3a1818" }}>
+                  ✕ RESET ALL
+                </button>
+            )}
+          </div>
+
+          {/* IMPORT/EXPORT BOX */}
+          {(overrideExportMode || overrideImportMode) && (
+              <div className="px-4 md:px-6 py-3 border-b" style={{ borderColor: "#3a2818", background: "rgba(0,0,0,0.4)" }}>
+                {overrideExportMode && (
+                    <div>
+                      <div className="mono-font text-[10px] tracking-widest text-stone-500 mb-2">
+                        ↗ EXPORT — copy this JSON to share or back up your overrides
+                      </div>
+                      <textarea readOnly value={overrideExportText} className="gothic w-full"
+                                style={{ height: "140px", fontFamily: "monospace", fontSize: "11px" }}
+                                onFocus={(e) => e.target.select()} />
+                      <div className="flex gap-2 mt-2">
+                        <button onClick={() => { navigator.clipboard?.writeText(overrideExportText); setImportStatus("✓ Copied to clipboard"); setTimeout(() => setImportStatus(""), 2000); }}
+                                className="mono-font text-[10px] tracking-widest px-3 py-1.5 border"
+                                style={{ color: "#d4c5a0", borderColor: "#2a1f15" }}>
+                          📋 COPY
+                        </button>
+                        <button onClick={() => setOverrideExportMode(false)}
+                                className="mono-font text-[10px] tracking-widest px-3 py-1.5 border"
+                                style={{ color: "#d4c5a0", borderColor: "#2a1f15" }}>
+                          ✕ CLOSE EXPORT
+                        </button>
+                      </div>
+                    </div>
+                )}
+                {overrideImportMode && (
+                    <div>
+                      <div className="mono-font text-[10px] tracking-widest text-stone-500 mb-2">
+                        ↙ IMPORT — paste a JSON override sheet below
+                      </div>
+                      <textarea value={overrideImportText} onChange={(e) => setOverrideImportText(e.target.value)}
+                                className="gothic w-full" placeholder='{"Space Marines|Captain": {"points": 80}, ...}'
+                                style={{ height: "140px", fontFamily: "monospace", fontSize: "11px" }} />
+                      <div className="flex gap-2 mt-2">
+                        <button onClick={handleImport}
+                                disabled={!overrideImportText.trim()}
+                                className="mono-font text-[10px] tracking-widest px-3 py-1.5 border"
+                                style={{
+                                  background: overrideImportText.trim() ? "#c9b037" : "transparent",
+                                  color: overrideImportText.trim() ? "#0a0806" : "#3a2818",
+                                  borderColor: "#2a1f15",
+                                  cursor: overrideImportText.trim() ? "pointer" : "not-allowed",
+                                }}>
+                          ↙ APPLY IMPORT
+                        </button>
+                        <button onClick={() => { setOverrideImportMode(false); setOverrideImportText(""); }}
+                                className="mono-font text-[10px] tracking-widest px-3 py-1.5 border"
+                                style={{ color: "#d4c5a0", borderColor: "#2a1f15" }}>
+                          ✕ CANCEL
+                        </button>
+                      </div>
+                    </div>
+                )}
+                {importStatus && (
+                    <div className="mono-font text-[11px] mt-2" style={{ color: importStatus.startsWith("✓") ? "#5a8b2a" : "#a05050" }}>
+                      {importStatus}
+                    </div>
+                )}
+              </div>
+          )}
+
+          {/* UNIT LIST */}
+          <div className="flex-1 overflow-y-auto px-4 md:px-6 py-3">
+            <div className="mono-font text-[10px] tracking-widest text-stone-600 mb-2">
+              {filteredUnits.length} unit{filteredUnits.length !== 1 ? "s" : ""} in {overrideFaction}
+              {filter && ` matching "${filter}"`}
+            </div>
+            <div className="space-y-1">
+              {filteredUnits.map((u) => {
+                const key = `${overrideFaction}|${u.name}`;
+                const override = pointOverrides[key];
+                const draft = overrideEditDrafts[u.name];
+                const hasDraft = draft !== undefined && draft !== "" && parseInt(draft) !== (override?.points ?? u.points);
+                const effective = override?.points ?? u.points;
+                return (
+                    <div key={u.name} className="flex items-center gap-2 py-1.5 px-2 border" style={{
+                      borderColor: override ? "#c9b037" : "#2a1f15",
+                      background: override ? "rgba(201,176,55,0.06)" : "transparent",
+                    }}>
+                      <div className="flex-1 min-w-0">
+                        <div className="display-font text-sm" style={{ color: "#d4c5a0" }}>
+                          {u.name}
+                        </div>
+                        <div className="mono-font text-[10px] text-stone-600 mt-0.5">
+                          {ROLE_LABELS[u.role] || u.role}
+                          {override && (
+                              <span className="ml-2" style={{ color: "#c9b037" }}>
+                          BASE: {u.name && (FACTIONS[overrideFaction] && (() => {
+                                // Find original base points by re-looking it up
+                                for (const sfName of Object.keys(FACTIONS[overrideFaction].subFactions)) {
+                                  const sf = FACTIONS[overrideFaction].subFactions[sfName];
+                                  const merged = mergeUnitPools(sf.units, sf.extra);
+                                  for (const role of Object.keys(merged)) {
+                                    const found = merged[role].find((x) => x.name === u.name);
+                                    if (found) return found.points;
+                                  }
+                                }
+                                return u.points;
+                              })())}pts
+                        </span>
+                          )}
+                        </div>
+                      </div>
+                      <input type="number" min="0" max="9999" placeholder={String(u.points)}
+                             value={draft !== undefined ? draft : (override ? String(override.points) : "")}
+                             onChange={(e) => setOverrideEditDrafts({ ...overrideEditDrafts, [u.name]: e.target.value })}
+                             onBlur={() => hasDraft && handleSaveOverride(u.name)}
+                             onKeyDown={(e) => { if (e.key === "Enter") handleSaveOverride(u.name); }}
+                             className="gothic"
+                             style={{ width: "70px", textAlign: "center" }} />
+                      <span className="mono-font text-[10px] text-stone-600 w-8">pts</span>
+                      {(override || hasDraft) && (
+                          <button onClick={() => handleResetUnit(u.name)}
+                                  className="mono-font text-[10px] tracking-widest px-2 py-1 border"
+                                  style={{ color: "#a05050", borderColor: "#3a1818" }}
+                                  title="Reset to base value">
+                            ↺
+                          </button>
+                      )}
+                    </div>
+                );
+              })}
+            </div>
+            {filteredUnits.length === 0 && (
+                <div className="text-center py-8 mono-font text-xs text-stone-500">
+                  No units match your filter.
+                </div>
+            )}
+          </div>
+
+          {/* FOOTER */}
+          <div className="px-4 md:px-6 py-2 border-t mono-font text-[9px] tracking-widest text-stone-600" style={{ borderColor: "#3a2818", background: "rgba(0,0,0,0.4)" }}>
+            OVERRIDES ARE USER-MAINTAINED · APPLIED TO GENERATOR, EDITOR & BATTLE SIM · STORED LOCALLY
+          </div>
+        </div>
+      </div>
+  );
+}
+
+    
 
